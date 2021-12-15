@@ -8,6 +8,8 @@ plugins=(
   zsh-autocomplete
 )
 skip_global_compinit=1
+export WIN_HOME="/mnt/c/Users/vicen"
+export WIN_DESKTOP="/mnt/d/Desktop"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
