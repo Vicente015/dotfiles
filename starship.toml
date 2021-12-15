@@ -1,15 +1,8 @@
+command_timeout = 10000
+
 [directory]
 truncate_to_repo=false
 truncation_length=-1
-style="fg:bright-green"
 
 [username]
 show_always=true
-style_root="bold fg:bright-blue"
-style_user="bold fg:bright-blue"
-
-[git_branch]
-style="fg:bright-yellow"
-
-[kubernetes]
-disabled=false
