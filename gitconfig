@@ -1,12 +1,16 @@
 [user]
   name = Vicente
   email = 33096355+Vicente015@users.noreply.github.com
+  signingkey=2ED0D2589C11B257
 
 [filter "lfs"]
   required = true
   clean = git-lfs clean -- %f
   smudge = git-lfs smudge -- %f
   process = git-lfs filter-process
+
+[commit]
+  gpgsign=true
 
 [init]
   defaultBranch = main
@@ -29,3 +33,9 @@
 
 [diff]
   colorMoved = zebra
+
+[gpg]
+  program=/bin/gpg
+
+[gpgp]
+  program=/bin/gpg
