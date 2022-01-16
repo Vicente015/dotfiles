@@ -20,18 +20,20 @@ source $ZSH/oh-my-zsh.sh
 # Helpers
 alias count_files='find . -type f | wc -l'
 
-# has_shipped `shipped_commit` `commit`
-function has_shipped() {
-  if git merge-base --is-ancestor "$2" "$1"; then
-    echo "Commit has shipped"
-  else
-    echo "Commit has not shipped"
-  fi
-}
-
 # findport `port`
 function findport() {
   lsof -nP -iTCP -sTCP:LISTEN | grep "$1"
+}
+
+# Replaces trash command to include clear subcommand
+function trash() {
+  case $1 in
+    --clear)
+      empty-trash
+      ;;
+    *)
+    command trash "$@";;
+  esac
 }
 
 # Replace ls
@@ -48,6 +50,12 @@ fi
 if [ "$(command -v bat)" ]; then
   unalias -m 'cat'
   alias cat='bat -pp --theme="OneHalfDark"'
+fi
+
+# Replace rm with a safer command
+if [ "$(command -v trash)" ]; then
+  unalias -m 'rm'
+  alias rm='trash'
 fi
 
 eval "$(starship init zsh)"

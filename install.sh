@@ -50,8 +50,8 @@ nvm install --lts
 nvm use --lts
 npm install -g npm@^8
 
-echo "Installing global npm packages (tldr,eslint,pm2,env-info,typescript)"
-npm install -g tldr eslint pm2 env-info typescript
+echo "Installing global npm packages (tldr,eslint,pm2,env-info,typescript, tash-cli, empty-trash-cli)"
+npm install -g tldr eslint pm2 env-info typescript trash-cli empty-trash-cli
 
 echo "Installing GitHub CLI"
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
