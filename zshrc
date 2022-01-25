@@ -10,10 +10,10 @@ plugins=(
 skip_global_compinit=1
 export WIN_HOME="/mnt/c/Users/vicen"
 export WIN_DESKTOP="/mnt/d/Desktop"
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export PNPM_HOME="/home/vicente/.local/share/pnpm"
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PNPM_HOME:$PATH"
+
 source $HOME/.cargo/env
 source $ZSH/oh-my-zsh.sh
 
@@ -36,13 +36,17 @@ function trash() {
   esac
 }
 
+function npmrjs() {
+  cd /mnt/c/Users/vicen/AppData/Roaming/runjs && npm i $1
+}
+
 # Replace ls
 if [ "$(command -v exa)" ]; then
     unalias -m 'll'
     unalias -m 'l'
     unalias -m 'la'
     unalias -m 'ls'
-    alias ls='exa -G  --color auto --icons -a -s type'
+    alias ls='exa -G --color auto --icons -s type'
     alias ll='exa -l --color always --icons -a -s type'
 fi
 

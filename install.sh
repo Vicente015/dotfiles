@@ -42,16 +42,12 @@ if [ ! -d "$HOME/.oh-my-zsh" ] ; then
   yes | sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-echo "Installing node LTS"
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-nvm install --lts
-nvm use --lts
-npm install -g npm@^8
+echo "Installing node LTS and pnpm"
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+pnpm env use --global lts
 
-echo "Installing global npm packages (tldr,eslint,pm2,env-info,typescript, tash-cli, empty-trash-cli)"
-npm install -g tldr eslint pm2 env-info typescript trash-cli empty-trash-cli
+echo "Installing global npm packages (tldr, eslint, pm2, envinfo, typescript, tash-cli, empty-trash-cli) with pnpm"
+pnpm add -g tldr eslint pm2 envinfo typescript trash-cli empty-trash-cli
 
 echo "Installing GitHub CLI"
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
@@ -59,12 +55,6 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githu
 sudo apt update -y && sudo apt install gh -y
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-echo "Installing nerd font"
-curl -fLo "FiraCodeNerdFont.ttf" \
-https://raw.githubusercontent.com/ryanoasis/nerd-fonts/master/patched-fonts/FiraCode/Regular/complete/Fira%20Code%20Regular%20Nerd%20Font%20Complete.ttf
-mkdir -p ~/.local/share/fonts
-mv FiraCodeNerdFont.ttf ~/.local/share/fonts/FiraCodeNerdFont.ttf
 
 echo "Configuring Starship"
 mkdir -p ~/.config &&
