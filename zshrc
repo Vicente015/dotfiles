@@ -13,6 +13,7 @@ export WIN_DESKTOP="/mnt/d/Desktop"
 export PNPM_HOME="/home/vicente/.local/share/pnpm"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$PNPM_HOME:$PATH"
+export GPG_TTY=$(tty)
 
 source $HOME/.cargo/env
 source $ZSH/oh-my-zsh.sh
