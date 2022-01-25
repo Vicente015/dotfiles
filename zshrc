@@ -8,12 +8,13 @@ plugins=(
   zsh-autocomplete
 )
 skip_global_compinit=1
-export WIN_HOME="/mnt/c/Users/vicen"
+export WIN_USER="vicen"
+export WIN_HOME="/mnt/c/Users/$WIN_USER"
 export WIN_DESKTOP="/mnt/d/Desktop"
 export PNPM_HOME="/home/vicente/.local/share/pnpm"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$PNPM_HOME:$PATH"
-export GPG_TTY=$(tty)
+export GPG_TTY=$(tty) # This fixes gpg in WSL
 
 source $HOME/.cargo/env
 source $ZSH/oh-my-zsh.sh
@@ -37,8 +38,9 @@ function trash() {
   esac
 }
 
+# npmrjs [package]
 function npmrjs() {
-  cd /mnt/c/Users/vicen/AppData/Roaming/runjs && npm i $1
+  cd "/mnt/c/Users/$WIN_USER/AppData/Roaming/runjs" && npm i $1
 }
 
 # Replace ls
