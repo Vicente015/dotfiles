@@ -35,7 +35,7 @@
   colorMoved = zebra
 
 [gpg]
-  program = gpg
+  program = "/mnt/c/Program Files (x86)/GnuPG/bin/gpg.exe"
 
 [gpgp]
-  program = gpg
+  program = "/mnt/c/Program Files (x86)/GnuPG/bin/gpg.exe"
