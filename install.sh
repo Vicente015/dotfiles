@@ -46,8 +46,8 @@ echo "Installing node LTS and pnpm"
 curl -fsSL https://get.pnpm.io/install.sh | sh -
 pnpm env use --global lts
 
-echo "Installing global npm packages (tldr, eslint, pm2, envinfo, typescript, tash-cli, empty-trash-cli) with pnpm"
-pnpm add -g tldr eslint pm2 envinfo typescript trash-cli empty-trash-cli
+echo "Installing global npm packages (tldr, eslint, pm2, envinfo, typescript, tash-cli, empty-trash-cli, share-cli) with pnpm"
+pnpm add -g tldr eslint pm2 envinfo typescript trash-cli empty-trash-cli share-cli
 
 echo "Installing GitHub CLI"
 curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
@@ -81,6 +81,9 @@ git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM
 
 # Autocomplete
 git clone https://github.com/marlonrichert/zsh-autocomplete.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autocomplete
+
+# PNPM Autocompletion - Yep, I don't like this but is the only way :( https://github.com/ohmyzsh/ohmyzsh/pull/9793
+mkdir -p ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/pnpm && wget https://raw.githubusercontent.com/loynoir/ohmyzsh/master/plugins/pnpm/pnpm.plugin.zsh -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/pnpm
 
 echo "Copying .zshrc"
 if test -f "$HOME/.zshrc"; then

@@ -6,6 +6,7 @@ plugins=(
   zsh-syntax-highlighting
   zsh-history-substring-search
   zsh-autocomplete
+  pnpm
 )
 skip_global_compinit=1
 export WIN_USER="vicen"
@@ -15,14 +16,17 @@ export PNPM_HOME="/home/vicente/.local/share/pnpm"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$PNPM_HOME:$PATH"
 export GPG_TTY=$(tty) # This fixes gpg in WSL
-# PNPM Autocompletion
-[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
 
 source $HOME/.cargo/env
 source $ZSH/oh-my-zsh.sh
 
 # Helpers
 alias count_files='find . -type f | wc -l'
+alias i='cd $HOME/i'
+alias clones='cd $HOME/i/_clones'
+alias forks='cd $HOME/i/_forks'
+alias issues='cd $HOME/i/_issues'
+alias tmp='cd $HOME/tmp'
 
 # findport `port`
 function findport() {
