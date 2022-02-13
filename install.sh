@@ -16,7 +16,7 @@ echo "Installing net-tools"
 sudo apt -y install net-tools
 
 echo "Installing latest rust"
-echo "1" | sh -c "$(curl https://sh.rustup.rs -sSf)"
+curl https://sh.rustup.rs -sSf | sh -s -- -y -q --profile=default
 source $HOME/.cargo/env
 
 echo "Installing utilities (git,zsh,bat,neofetch)"
