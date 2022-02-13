@@ -19,20 +19,20 @@ echo "Installing latest rust"
 curl https://sh.rustup.rs -sSf | sh -s -- -y -q --profile=default
 source $HOME/.cargo/env
 
-echo "Installing utilities (git,zsh,bat,neofetch)"
+echo "Installing utilities (git,zsh,neofetch)"
 sudo apt -y install git
 sudo apt -y install zsh
-sudo apt -y install bat
 sudo apt -y install neofetch
 
 # This is required to make bat work (https://github.com/sharkdp/bat/#on-ubuntu-using-apt)
-mkdir -p ~/.local/bin
-export PATH="$HOME/.local/bin:$PATH"
-ln -s /usr/bin/batcat ~/.local/bin/bat
+# mkdir -p ~/.local/bin
+# export PATH="$HOME/.local/bin:$PATH"
+# ln -s /usr/bin/batcat ~/.local/bin/bat
 
-echo "Installing other utilities with cargo (exa,delta)"
+echo "Installing other utilities with cargo (exa,delta,bat)"
 cargo install exa
 cargo install git-delta
+cargo install --locked bat
 
 echo "Installing starship"
 yes | sh -c "$(curl -fsSL https://starship.rs/install.sh)"
