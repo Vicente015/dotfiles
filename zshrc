@@ -7,6 +7,7 @@ plugins=(
   zsh-history-substring-search
   zsh-autocomplete
   pnpm
+  sudo
 )
 skip_global_compinit=1
 export WIN_USER="vicen"
