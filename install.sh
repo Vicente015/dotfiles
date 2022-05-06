@@ -19,10 +19,11 @@ echo "Installing latest rust"
 curl https://sh.rustup.rs -sSf | sh -s -- -y -q --profile=default
 source $HOME/.cargo/env
 
-echo "Installing utilities (git,zsh,neofetch)"
+echo "Installing utilities (git,zsh,neofetch,pfetch)"
 sudo apt -y install git
 sudo apt -y install zsh
 sudo apt -y install neofetch
+sudo wget --output-document /usr/bin/pfetch https://raw.githubusercontent.com/dylanaraps/pfetch/master/pfetch
 
 # This is required to make bat work (https://github.com/sharkdp/bat/#on-ubuntu-using-apt)
 # mkdir -p ~/.local/bin
@@ -90,6 +91,9 @@ if test -f "$HOME/.zshrc"; then
   mv ~/.zshrc ~/zshrc.backup
 fi
 ln -s "$DIR/zshrc" ~/.zshrc
+
+# Create customs dirs
+# mkdir i ii v temp
 
 # Make zsh the defualt shell
 chsh -s $(which zsh)

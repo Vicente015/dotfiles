@@ -27,6 +27,8 @@ alias i='cd $HOME/i'
 alias clones='cd $HOME/i/_clones'
 alias forks='cd $HOME/i/_forks'
 alias issues='cd $HOME/i/_issues'
+alias ii='cd $HOME/ii'
+alias v='cd $HOME/v'
 alias tmp='cd $HOME/tmp'
 
 # findport `port`
@@ -73,4 +75,4 @@ if [ "$(command -v trash)" ]; then
 fi
 
 eval "$(starship init zsh)"
-# neofetch
+pfetch
