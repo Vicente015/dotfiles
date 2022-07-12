@@ -10,19 +10,36 @@ plugins=(
   sudo
 )
 skip_global_compinit=1
-export WIN_USER="vicen"
-export WIN_HOME="/mnt/c/Users/$WIN_USER"
-export WIN_DESKTOP="/mnt/d/Desktop"
+
+# If it's WSL
+# Reference: https://stackoverflow.com/questions/38086185/how-to-check-if-a-program-is-run-in-bash-on-ubuntu-on-windows-and-not-just-plain
+if [[ -n "$IS_WSL" || -n "$WSL_DISTRO_NAME" ]]; then
+  export WIN_USER="vicen"
+  export WIN_HOME="/mnt/c/Users/$WIN_USER"
+  export WIN_DESKTOP="/mnt/d/Desktop"
+  export GPG_TTY=$(tty) # This fixes gpg in WSL
+
+  # npmrjs [package]
+  function npmrjs() {
+    cd "/mnt/c/Users/$WIN_USER/AppData/Roaming/runjs" && npm i $1
+  }
+fi
+
 export PNPM_HOME="/home/vicente/.local/share/pnpm"
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$PNPM_HOME:$PATH"
-export GPG_TTY=$(tty) # This fixes gpg in WSL
+export DENO_INSTALL="/home/vicente/.deno"
+export GOPATH="$HOME/go"
+export GOROOT="/usr/local/go"
+export PATH="$GOPATH/bin:$GOROOT/bin:$PNPM_HOME:$DENO_INSTALL/bin:$HOME/.local/bin:$PATH"
 
 source $HOME/.cargo/env
 source $ZSH/oh-my-zsh.sh
 
 # Helpers
 alias count_files='find . -type f | wc -l'
+alias repl='NODE_PATH=$(pnpm root -g) node'
+alias exifclear='flatpak run fr.romainvigier.MetadataCleaner'
+
+# Easy access to folders
 alias i='cd $HOME/i'
 alias clones='cd $HOME/i/_clones'
 alias forks='cd $HOME/i/_forks'
@@ -37,6 +54,8 @@ function findport() {
 }
 
 # Replaces trash command to include clear subcommand
+# https://www.npmjs.com/package/trash-cli
+# https://www.npmjs.com/package/empty-trash-cli
 function trash() {
   case $1 in
     --clear)
@@ -47,10 +66,11 @@ function trash() {
   esac
 }
 
-# npmrjs [package]
-function npmrjs() {
-  cd "/mnt/c/Users/$WIN_USER/AppData/Roaming/runjs" && npm i $1
-}
+# Replace rm with a safer command
+if [ "$(command -v trash)" ]; then
+  unalias -m 'rm'
+  alias rm='trash'
+fi
 
 # Replace ls
 if [ "$(command -v exa)" ]; then
@@ -68,11 +88,8 @@ if [ "$(command -v bat)" ]; then
   alias cat='bat -pp --theme="OneHalfDark"'
 fi
 
-# Replace rm with a safer command
-if [ "$(command -v trash)" ]; then
-  unalias -m 'rm'
-  alias rm='trash'
-fi
+# Fix for discord screensharing in wayland?
+# alias mon2cam="deno run --unstable -A -r -q https://raw.githubusercontent.com/ShayBox/Mon2Cam/master/src/mod.ts"
 
 eval "$(starship init zsh)"
 pfetch
