@@ -16,11 +16,17 @@ echo "Add flatpaks repos"
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 sudo flatpak remote-add --if-not-exists gnome-nightly https://nightly.gnome.org/gnome-nightly.flatpakrepo
 
-echo "Installing curl and wget"
-sudo dnf -y install curl wget
+echo "Installing curl and wget zip unzip"
+sudo dnf -y install curl wget zip unzip
 
 echo "Installing wl-clipboard"
 sudo dnf install -y wl-clipboard
+
+echo "Installing kryptor"
+wget https://github.com/samuel-lucas6/Kryptor/releases/latest/download/kryptor-linux-x64.zip
+unzip kryptor-linux-x64.zip -d kryptor-linux-x64
+sudo cp kryptor-linux-x64/kryptor /usr/bin/kryptor
+rm -r kryptor-linux-x64.zip kryptor-linux-x64/
 
 echo "Installing developer tools"
 sudo dnf -y groupinstall "Development Tools" "Development Libraries"
