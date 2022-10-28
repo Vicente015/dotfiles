@@ -4,42 +4,25 @@
 set -e
 
 echo "Upgrading packages..."
-# clear cache
-sudo dnf clean all
-sudo dnf -y update
-
-echo "Installing rmpfusion"
-sudo dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-sudo dnf -y groupupdate core
-
-echo "Add flatpaks repos"
-sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-sudo flatpak remote-add --if-not-exists gnome-nightly https://nightly.gnome.org/gnome-nightly.flatpakrepo
+sudo apt update -y && sudo apt upgrade -y
 
 echo "Installing curl and wget"
-sudo dnf -y install curl wget
-
-echo "Installing wl-clipboard"
-sudo dnf install -y wl-clipboard
+sudo apt -y install curl wget
 
 echo "Installing developer tools"
-sudo dnf -y groupinstall "Development Tools" "Development Libraries"
+sudo apt -y install build-essential
 
 echo "Installing net-tools"
-sudo dnf -y install net-tools
+sudo apt -y install net-tools
 
-echo "Installing rust"
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y -q --profile=default
+echo "Installing latest rust"
+curl https://sh.rustup.rs -sSf | sh -s -- -y -q --profile=default
 source $HOME/.cargo/env
 
-echo "Installing deno"
-curl -fsSL https://deno.land/x/install/install.sh | sh
-
-echo "Installing golang"
-sudo dnf -y install golang
-
-echo "Installing cli utilities (git,zsh,neofetch,pfetch)"
-sudo dnf -y install git zsh neofetch
+echo "Installing utilities (git,zsh,neofetch,pfetch)"
+sudo apt -y install git
+sudo apt -y install zsh
+sudo apt -y install neofetch
 sudo wget --output-document /usr/bin/pfetch https://raw.githubusercontent.com/dylanaraps/pfetch/master/pfetch
 
 # This is required to make bat work (https://github.com/sharkdp/bat/#on-ubuntu-using-apt)
@@ -64,11 +47,15 @@ echo "Installing node LTS and pnpm"
 curl -fsSL https://get.pnpm.io/install.sh | sh -
 pnpm env use --global lts
 
-echo "Installing global npm packages with pnpm"
-pnpm add -g tldr eslint pm2 envinfo typescript trash-cli empty-trash-cli share-cli @antfu/ni taze eas-cli expo-cli
+echo "Installing global npm packages (tldr, eslint, pm2, envinfo, typescript, tash-cli, empty-trash-cli, share-cli) with pnpm"
+pnpm add -g tldr eslint pm2 envinfo typescript trash-cli empty-trash-cli share-cli
 
 echo "Installing GitHub CLI"
-sudo dnf -y install gh
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+sudo apt update -y && sudo apt install gh -y
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 echo "Configuring Starship"
 mkdir -p ~/.config &&
@@ -106,7 +93,7 @@ fi
 ln -s "$DIR/zshrc" ~/.zshrc
 
 # Create customs dirs
-# mkdir $HOME/i $HOME/ii $HOME/v $HOME/temp
+# mkdir i ii v temp
 
 # Make zsh the defualt shell
 chsh -s $(which zsh)

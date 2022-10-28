@@ -29,7 +29,7 @@
   diffFilter = delta --color-only
 
 [merge]
-    conflictstyle = diff3
+  conflictstyle = diff3
 
 [diff]
   colorMoved = zebra

@@ -1,5 +1,5 @@
 # Dotfiles
-My personal dotfiles for Ubuntu and Windows WSL2.
+My personal dotfiles for Fedora 36.
 
 ![image](.github/readme.png)
 

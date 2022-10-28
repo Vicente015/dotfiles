@@ -11,24 +11,11 @@ plugins=(
 )
 skip_global_compinit=1
 
-# If it's WSL
-# Reference: https://stackoverflow.com/questions/38086185/how-to-check-if-a-program-is-run-in-bash-on-ubuntu-on-windows-and-not-just-plain
-if [[ -n "$IS_WSL" || -n "$WSL_DISTRO_NAME" ]]; then
-  export WIN_USER="vicen"
-  export WIN_HOME="/mnt/c/Users/$WIN_USER"
-  export WIN_DESKTOP="/mnt/d/Desktop"
-  export GPG_TTY=$(tty) # This fixes gpg in WSL
-
-  # npmrjs [package]
-  function npmrjs() {
-    cd "/mnt/c/Users/$WIN_USER/AppData/Roaming/runjs" && npm i $1
-  }
-fi
-
 export PNPM_HOME="/home/vicente/.local/share/pnpm"
 export DENO_INSTALL="/home/vicente/.deno"
-export GOPATH="$HOME/go"
-export GOROOT="/usr/local/go"
+export GOPATH="$HOME/.go"
+export GOROOT="/usr/local/.go"
+export ANDROID_HOME="$HOME/Android/Sdk"
 export PATH="$GOPATH/bin:$GOROOT/bin:$PNPM_HOME:$DENO_INSTALL/bin:$HOME/.local/bin:$PATH"
 
 source $HOME/.cargo/env
@@ -88,8 +75,13 @@ if [ "$(command -v bat)" ]; then
   alias cat='bat -pp --theme="OneHalfDark"'
 fi
 
-# Fix for discord screensharing in wayland?
-# alias mon2cam="deno run --unstable -A -r -q https://raw.githubusercontent.com/ShayBox/Mon2Cam/master/src/mod.ts"
+# Wayland copy to clipboard // dnf install wl-clipboard
+if [ "$(command -v wl-copy)" ]; then
+  unalias -m 'cb'
+  unalias -m 'pb'
+  alias cb='wl-copy'
+  alias pb='wl-paste'
+fi
 
 eval "$(starship init zsh)"
 pfetch
