@@ -49,6 +49,7 @@ sudo dnf -y install golang
 echo "Installing cli utilities (git,zsh,neofetch,pfetch)"
 sudo dnf -y install git zsh neofetch
 sudo wget --output-document /usr/bin/pfetch https://raw.githubusercontent.com/dylanaraps/pfetch/master/pfetch
+sudo chmod +x /usr/bin/pfetch
 
 # This is required to make bat work (https://github.com/sharkdp/bat/#on-ubuntu-using-apt)
 # mkdir -p ~/.local/bin
@@ -119,7 +120,7 @@ ln -s "$DIR/zshrc" ~/.zshrc
 # mkdir $HOME/i $HOME/ii $HOME/v $HOME/temp
 
 # Install flatpak apps
-# flatpak install -y $(grep "^[^#;]" flatpak-apps.txt | tr '\n' ' ')
+# ./sync-flatpak.sh --import-apps
 
 # Make zsh the defualt shell
 chsh -s $(which zsh)
