@@ -3,6 +3,8 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
+DIR="$HOME/dotfiles"
+
 echo "Upgrading packages..."
 # clear cache
 sudo dnf clean all
@@ -12,12 +14,12 @@ echo "Installing rmpfusion"
 sudo dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 sudo dnf -y groupupdate core
 
-echo "Add flatpaks repos"
+echo "Adding flatpaks repos"
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 sudo flatpak remote-add --if-not-exists gnome-nightly https://nightly.gnome.org/gnome-nightly.flatpakrepo
 
-echo "Installing curl and wget zip unzip"
-sudo dnf -y install curl wget zip unzip
+echo "Installing curl and wget zip unzip util-linux-user"
+sudo dnf -y install curl wget zip unzip util-linux-user
 
 echo "Installing wl-clipboard"
 sudo dnf install -y wl-clipboard
@@ -68,6 +70,8 @@ fi
 
 echo "Installing node LTS and pnpm"
 curl -fsSL https://get.pnpm.io/install.sh | sh -
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$PNPM_HOME:$PATH"
 pnpm env use --global lts
 
 echo "Installing global npm packages with pnpm"
@@ -113,6 +117,9 @@ ln -s "$DIR/zshrc" ~/.zshrc
 
 # Create customs dirs
 # mkdir $HOME/i $HOME/ii $HOME/v $HOME/temp
+
+# Install flatpak apps
+# flatpak install -y $(grep "^[^#;]" flatpak-apps.txt | tr '\n' ' ')
 
 # Make zsh the defualt shell
 chsh -s $(which zsh)
