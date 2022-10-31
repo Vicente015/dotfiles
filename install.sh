@@ -5,6 +5,11 @@ set -e
 
 DIR="$HOME/dotfiles"
 
+echo "Configuring dnf"
+echo "defaultyes=True" >> /etc/dnf/dnf.conf
+echo "keepcache=True" >> /etc/dnf/dnf.conf
+echo "countme=False" >> /etc/dnf/dnf.conf
+
 echo "Upgrading packages..."
 # clear cache
 sudo dnf clean all
