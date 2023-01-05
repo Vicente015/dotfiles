@@ -14,7 +14,7 @@ skip_global_compinit=1
 export PNPM_HOME="$HOME/.local/share/pnpm"
 export DENO_INSTALL="$HOME/.deno"
 export GOPATH="$HOME/.go"
-export GOROOT="/usr/local/.go"
+export GOROOT="/usr/local/go"
 export ANDROID_HOME="$HOME/Android/Sdk"
 export PATH="$GOPATH/bin:$GOROOT/bin:$PNPM_HOME:$DENO_INSTALL/bin:$HOME/.local/bin:$PATH"
 

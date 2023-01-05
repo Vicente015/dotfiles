@@ -6,9 +6,9 @@ set -e
 DIR="$HOME/dotfiles"
 
 echo "Configuring dnf"
-echo "defaultyes=True" >> /etc/dnf/dnf.conf
-echo "keepcache=True" >> /etc/dnf/dnf.conf
-echo "countme=False" >> /etc/dnf/dnf.conf
+sudo bash -c "echo "defaultyes=True" >> /etc/dnf/dnf.conf"
+sudo bash -c "echo "keepcache=True" >> /etc/dnf/dnf.conf"
+sudo bash -c "echo "countme=False" >> /etc/dnf/dnf.conf"
 
 echo "Upgrading packages..."
 # clear cache
@@ -33,6 +33,7 @@ echo "Installing kryptor"
 wget https://github.com/samuel-lucas6/Kryptor/releases/latest/download/kryptor-linux-x64.zip
 unzip kryptor-linux-x64.zip -d kryptor-linux-x64
 sudo cp kryptor-linux-x64/kryptor /usr/bin/kryptor
+sudo chmod +x /usr/bin/kryptor
 rm -r kryptor-linux-x64.zip kryptor-linux-x64/
 
 echo "Installing developer tools"
@@ -40,6 +41,9 @@ sudo dnf -y groupinstall "Development Tools" "Development Libraries"
 
 echo "Installing net-tools"
 sudo dnf -y install net-tools
+
+echo "Installing rclone"
+sudo dnf -y install rclone
 
 echo "Installing rust"
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y -q --profile=default
