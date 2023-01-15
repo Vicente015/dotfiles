@@ -1,3 +1,4 @@
 [Context]
-sockets=fallback-x11
+shared=network
+devices=all
 filesystems=home
