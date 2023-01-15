@@ -13,7 +13,7 @@ sudo bash -c "echo "countme=False" >> /etc/dnf/dnf.conf"
 echo "Upgrading packages..."
 # clear cache
 sudo dnf clean all
-sudo dnf -y update
+sudo dnf -y --refresh update
 
 echo "Installing rmpfusion"
 sudo dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
@@ -21,6 +21,7 @@ sudo dnf -y groupupdate core
 
 echo "Adding flatpaks repos"
 sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+sudo flatpak remote-add --if-not-exists flathub-beta https://flathub.org/beta-repo/flathub-beta.flatpakrepo;
 sudo flatpak remote-add --if-not-exists gnome-nightly https://nightly.gnome.org/gnome-nightly.flatpakrepo
 
 echo "Installing curl and wget zip unzip util-linux-user"
@@ -69,6 +70,11 @@ echo "Installing other utilities with cargo (exa,delta,bat)"
 cargo install exa
 cargo install git-delta
 cargo install --locked bat
+
+# ? Optional // quartz setup
+# echo "Installing quartz setup"
+# sudo go install github.com/jackyzha0/hugo-obsidian@latest
+# sudo dnf -y install hugo
 
 echo "Installing starship"
 yes | sh -c "$(curl -fsSL https://starship.rs/install.sh)"
