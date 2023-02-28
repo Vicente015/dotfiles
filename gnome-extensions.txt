@@ -1,0 +1,16 @@
+display-brightness-ddcutil@themightydeity.github.com
+clipboard-indicator@tudmotu.com
+material-you-theme@asubbiah.com
+rounded-window-corners@yilozt
+tiling-assistant@leleat-on-github
+emoji-selector@maestroschan.fr
+search-light@icedman.github.com
+indicate-focus@leleat-on-github
+grand-theft-focus@zalckos.github.com
+gnome-fuzzy-app-search@gnome-shell-extensions.Czarlie.gitlab.com
+appindicatorsupport@rgcjonas.gmail.com
+blur-my-shell@aunetx
+dash-to-dock@micxgx.gmail.com
+gsconnect@andyholmes.github.io
+openweather-extension@jenslody.de
+quick-settings-tweaks@qwreey

@@ -15,7 +15,8 @@ export PNPM_HOME="$HOME/.local/share/pnpm"
 export DENO_INSTALL="$HOME/.deno"
 export GOPATH="$HOME/.go"
 export ANDROID_HOME="$HOME/Android/Sdk"
-export PATH="$GOPATH/bin:$PNPM_HOME:$DENO_INSTALL/bin:$HOME/.local/bin:$PATH"
+export ANDROID_BUILD_TOOLS="$ANDROID_HOME/build-tools/33.0.0/"
+export PATH="$ANDROID_BUILD_TOOLS:$GOPATH/bin:$PNPM_HOME:$DENO_INSTALL/bin:$HOME/.local/bin:$PATH"
 
 source $HOME/.cargo/env
 source $ZSH/oh-my-zsh.sh
@@ -33,13 +34,16 @@ alias issues='cd $HOME/i/_issues'
 alias ii='cd $HOME/ii'
 alias v='cd $HOME/v'
 alias tmp='cd $HOME/tmp'
+alias h='cd $HOME'
+alias lsd='ls | lolcat'
+alias open='open-cli'
 
 # findport `port`
 function findport() {
   lsof -nP -iTCP -sTCP:LISTEN | grep "$1"
 }
 
-# Replaces trash command to include clear subcommand
+# # Replaces trash command to include clear subcommand
 # https://www.npmjs.com/package/trash-cli
 # https://www.npmjs.com/package/empty-trash-cli
 function trash() {
@@ -74,7 +78,7 @@ if [ "$(command -v bat)" ]; then
   alias cat='bat -pp --theme="OneHalfDark"'
 fi
 
-# Wayland copy to clipboard // dnf install wl-clipboard
+# Wayland copy to clipboard
 if [ "$(command -v wl-copy)" ]; then
   unalias -m 'cb'
   unalias -m 'pb'

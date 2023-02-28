@@ -40,6 +40,25 @@ rm -r kryptor-linux-x64.zip kryptor-linux-x64/
 echo "Installing developer tools"
 sudo dnf -y groupinstall "Development Tools" "Development Libraries"
 
+# echo "Installing GNOME developer libraries"
+# sudo dnf -y install gtk3-devel gtk4-devel libadwaita-devel
+
+echo "Installing Visual Studio Code via dnf repo"
+sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+sudo dnf -y check-update
+sudo dnf -y install code
+
+echo "Installing docker via dnf repo"
+sudo dnf -y install dnf-plugins-core
+sudo dnf -y config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+sudo dnf -y install docker-ce docker-ce-cli containerd.io
+
+# echo "Installing KeeWeb"
+# wget https://github.com/keeweb/keeweb/releases/download/v1.18.7/KeeWeb-1.18.7.linux.x86_64.rpm
+# sudo rpm -i KeeWeb-1.18.7.linux.x86_64.rpm
+# rm -r KeeWeb-1.18.7.linux.x86_64.rpm
+
 echo "Installing net-tools"
 sudo dnf -y install net-tools
 
@@ -91,7 +110,7 @@ export PATH="$PNPM_HOME:$PATH"
 pnpm env use --global lts
 
 echo "Installing global npm packages with pnpm"
-pnpm add -g tldr eslint pm2 envinfo typescript trash-cli empty-trash-cli share-cli @antfu/ni taze eas-cli expo-cli
+pnpm add -g tldr eslint pm2 envinfo typescript trash-cli empty-trash-cli share-cli @antfu/ni taze eas-cli expo-cli open-cli
 
 echo "Installing GitHub CLI"
 sudo dnf -y install gh
