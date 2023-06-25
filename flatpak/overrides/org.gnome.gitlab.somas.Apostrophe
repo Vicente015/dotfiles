@@ -1,2 +1,2 @@
 [Context]
-filesystems=!host
+filesystems=/home/vicente/v/notes;home;!host

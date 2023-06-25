@@ -16,10 +16,13 @@ export DENO_INSTALL="$HOME/.deno"
 export GOPATH="$HOME/.go"
 export ANDROID_HOME="$HOME/Android/Sdk"
 export ANDROID_BUILD_TOOLS="$ANDROID_HOME/build-tools/33.0.0/"
-export PATH="$ANDROID_BUILD_TOOLS:$GOPATH/bin:$PNPM_HOME:$DENO_INSTALL/bin:$HOME/.local/bin:$PATH"
+export CHROMEDRIVER_PATH="/home/vicente/.cache/selenium/chromedriver/linux64/113.0.5672.63/chromedriver"
+export PATH="$CHROMEDRIVER_PATH:$ANDROID_BUILD_TOOLS:$GOPATH/bin:$PNPM_HOME:$DENO_INSTALL/bin:$HOME/.local/bin:$PATH"
 
 source $HOME/.cargo/env
 source $ZSH/oh-my-zsh.sh
+# bun completions
+[ -s "/home/vicente/.bun/_bun" ] && source "/home/vicente/.bun/_bun"
 
 # Helpers
 alias count_files='find . -type f | wc -l'

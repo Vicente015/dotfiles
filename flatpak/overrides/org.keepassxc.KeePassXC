@@ -1,3 +1,3 @@
 [Context]
-devices=!all
-filesystems=!host
+sockets=!x11
+filesystems=/home/vicente/secrets

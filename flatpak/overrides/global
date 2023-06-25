@@ -1,4 +1,2 @@
 [Context]
-filesystems=xdg-config/gtk-4.0
-shared=!network;!ipc;
-sockets=!x11;!fallback-x11;
+filesystems=!xdg-config/gtk-3.0;!xdg-config/gtk-4.0;
