@@ -75,15 +75,10 @@ curl -fsSL https://deno.land/x/install/install.sh | sh
 echo "Installing golang"
 sudo dnf -y install golang
 
-echo "Installing cli utilities (git,zsh,neofetch,pfetch)"
-sudo dnf -y install git zsh neofetch
+echo "Installing cli utilities (git,fish,neofetch,pfetch)"
+sudo dnf -y install git fish neofetch
 sudo wget --output-document /usr/bin/pfetch https://raw.githubusercontent.com/dylanaraps/pfetch/master/pfetch
 sudo chmod +x /usr/bin/pfetch
-
-# This is required to make bat work (https://github.com/sharkdp/bat/#on-ubuntu-using-apt)
-# mkdir -p ~/.local/bin
-# export PATH="$HOME/.local/bin:$PATH"
-# ln -s /usr/bin/batcat ~/.local/bin/bat
 
 echo "Installing other utilities with cargo (exa,delta,bat)"
 cargo install exa
@@ -97,11 +92,6 @@ cargo install --locked bat
 
 echo "Installing starship"
 yes | sh -c "$(curl -fsSL https://starship.rs/install.sh)"
-
-if [ ! -d "$HOME/.oh-my-zsh" ] ; then
-  echo "Installing Oh My Zsh"
-  yes | sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-fi
 
 echo "Installing node LTS and pnpm"
 curl -fsSL https://get.pnpm.io/install.sh | sh -
@@ -128,27 +118,14 @@ if test -f "$HOME/.gitconfig"; then
 fi
 ln -s "$DIR/gitconfig" ~/.gitconfig
 
-echo "Installing oh-my-zsh plugins (autosuggestions,syntax-highlighting,completions,history-substring-search,autocomplete)"
-# Autosuggestions
-git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+echo "Installing PNPM autocompletion in fish"
+pnpm install-completion
 
-# Syntax highlighting
-git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
-
-# History substring search
-git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search
-
-# Autocomplete
-git clone https://github.com/marlonrichert/zsh-autocomplete.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autocomplete
-
-# PNPM Autocompletion - Yep, I don't like this but is the only way :( https://github.com/ohmyzsh/ohmyzsh/pull/9793
-mkdir -p ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/pnpm && wget https://raw.githubusercontent.com/loynoir/ohmyzsh/master/plugins/pnpm/pnpm.plugin.zsh -P ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/pnpm
-
-echo "Copying .zshrc"
-if test -f "$HOME/.zshrc"; then
-  mv ~/.zshrc ~/zshrc.backup
+echo "Copying config.fish"
+if test -f "$HOME/.config/fish/config.fish"; then
+  mv ~/.config/fish/config.fish ~/.config/fish/config.fish.backup
 fi
-ln -s "$DIR/zshrc" ~/.zshrc
+ln -s "$DIR/config.fish" ~/.config/fish/config.fish
 
 # Create customs dirs
 # mkdir $HOME/i $HOME/ii $HOME/v $HOME/temp
@@ -157,6 +134,6 @@ ln -s "$DIR/zshrc" ~/.zshrc
 # ./sync-flatpak.sh --import-apps
 
 # Make zsh the defualt shell
-chsh -s $(which zsh)
+chsh -s $(which fish)
 echo "Done! Everything installed"
-zsh
+fish
