@@ -133,7 +133,7 @@ ln -s "$DIR/config.fish" ~/.config/fish/config.fish
 # Install flatpak apps
 # ./sync-flatpak.sh --import-apps
 
-# Make zsh the defualt shell
+# Make Fish the defualt shell
 chsh -s $(which fish)
 echo "Done! Everything installed"
 fish
