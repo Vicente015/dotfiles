@@ -40,16 +40,16 @@ function exifclear
 end
 
 # # Easy access to folders
-alias -s i='cd $HOME/i'
-alias -s clones='cd $HOME/i/_clones'
-alias -s forks='cd $HOME/i/_forks'
-alias -s issues='cd $HOME/i/_issues'
-alias -s ii='cd $HOME/ii'
-alias -s v='cd $HOME/v'
-alias -s tmp='cd $HOME/tmp'
-alias -s h='cd $HOME'
-alias -s lsd='ls | lolcat'
-alias -s open='open-cli'
+alias i='cd $HOME/i'
+alias clones='cd $HOME/i/_clones'
+alias forks='cd $HOME/i/_forks'
+alias issues='cd $HOME/i/_issues'
+alias ii='cd $HOME/ii'
+alias v='cd $HOME/v'
+alias tmp='cd $HOME/tmp'
+alias h='cd $HOME'
+alias lsd='ls | lolcat'
+alias open='open-cli'
 
 # findport `port`
 function findport
@@ -68,10 +68,15 @@ function trash
     end
 end
 
+## # Add 'greeting message'
+function fish_greeting
+    PF_INFO="ascii title os kernel  de shell uptime" /usr/bin/pfetch
+end
+
 # Replace rm with a safer command
 if command -v trash > /dev/null
     unalias rm &> /dev/null
-    alias -s rm='trash'
+    alias rm='trash'
 end
 
 # Replace ls
@@ -80,23 +85,22 @@ if command -v exa > /dev/null
     unalias l &> /dev/null
     unalias la &> /dev/null
     unalias ls &> /dev/null
-    alias -s ls='exa -G --color auto --icons -s type'
-    alias -s ll='exa -l --color always --icons -a -s type'
+    alias ls='exa -G --color auto --icons -s type'
+    alias ll='exa -l --color always --icons -a -s type'
 end
 
 # Replace cat
 if command -v bat > /dev/null
     unalias cat &> /dev/null
-    alias -s cat='bat -pp --theme="OneHalfDark"'
+    alias cat='bat -pp --theme="OneHalfDark"'
 end
 
 # Wayland copy to clipboard
 if command -v wl-copy > /dev/null
     unalias cb &> /dev/null
     unalias pb &> /dev/null
-    alias -s cb='wl-copy'
-    alias -s pb='wl-paste'
+    alias cb='wl-copy'
+    alias pb='wl-paste'
 end
 
 starship init fish | source
-pfetch
