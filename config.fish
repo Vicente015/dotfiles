@@ -4,26 +4,25 @@ end
 
 # ? Removes fish greetings message
 set fish_greeting ""
+
+# # PATH
+set -gx VOLTA_HOME "$HOME/.volta"
 set -x PNPM_HOME "$HOME/.local/share/pnpm"
 set -x DENO_INSTALL "$HOME/.deno"
 set -x GOPATH "$HOME/.go"
 set -x ANDROID_HOME "$HOME/Android/Sdk"
 set -x ANDROID_BUILD_TOOLS "$ANDROID_HOME/build-tools/33.0.0/"
-set -x CHROMEDRIVER_PATH "/home/vicente/.cache/selenium/chromedriver/linux64/113.0.5672.63/chromedriver"
 set -x VOLTA_HOME "$HOME/.volta"
-# set -x PATH "$CHROMEDRIVER_PATH" "$ANDROID_BUILD_TOOLS" "$GOPATH/bin" "$PNPM_HOME" "$DENO_INSTALL/bin" "$HOME/.local/bin" $PATH
-
-
 
 # # Add folders to path
 fish_add_path $CHROMEDRIVER_PATH
 fish_add_path $ANDROID_BUILD_TOOLS
-fish_add_path $GOPATH/bin
 fish_add_path $PNPM_HOME
+fish_add_path $GOPATH/bin
+fish_add_path $VOLTA_HOME/bin
 fish_add_path $DENO_INSTALL/bin
 fish_add_path $HOME/.local/bin
-fish_add_path $VOLTA_HOME/bin
-set -U fish_user_paths $HOME/.cargo/bin $fish_user_paths
+fish_add_path $HOME/.cargo/bin
 
 # # pnpm completions
 # tabtab source for packages
@@ -55,6 +54,7 @@ alias h='cd $HOME'
 alias lsd='ls | lolcat'
 alias open='open-cli'
 alias gedit='flatpak run org.gnome.TextEditor'
+alias tbox='SHELL=/usr/bin/fish toolbox enter'
 
 # findport `port`
 function findport
@@ -73,9 +73,9 @@ function trash
     end
 end
 
-## # Add 'greeting message'
+# Add 'greeting message'
 function fish_greeting
-    PF_INFO="ascii title os kernel  de shell uptime" pfetch
+    PF_INFO="ascii title os kernel  de shell uptime" ~/.local/bin/pfetch
 end
 
 # Replace rm with a safer command
