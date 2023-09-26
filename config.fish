@@ -97,7 +97,7 @@ end
 # Replace cat
 if command -v bat > /dev/null
     unalias cat &> /dev/null
-    alias cat='bat -pp --theme="OneHalfDark"'
+    alias cat='bat --paging=never -n --theme="OneHalfDark"'
 end
 
 # Wayland copy to clipboard
