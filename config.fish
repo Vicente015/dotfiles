@@ -10,7 +10,10 @@ set -x GOPATH "$HOME/.go"
 set -x ANDROID_HOME "$HOME/Android/Sdk"
 set -x ANDROID_BUILD_TOOLS "$ANDROID_HOME/build-tools/33.0.0/"
 set -x CHROMEDRIVER_PATH "/home/vicente/.cache/selenium/chromedriver/linux64/113.0.5672.63/chromedriver"
+set -x VOLTA_HOME "$HOME/.volta"
 # set -x PATH "$CHROMEDRIVER_PATH" "$ANDROID_BUILD_TOOLS" "$GOPATH/bin" "$PNPM_HOME" "$DENO_INSTALL/bin" "$HOME/.local/bin" $PATH
+
+
 
 # # Add folders to path
 fish_add_path $CHROMEDRIVER_PATH
@@ -19,6 +22,7 @@ fish_add_path $GOPATH/bin
 fish_add_path $PNPM_HOME
 fish_add_path $DENO_INSTALL/bin
 fish_add_path $HOME/.local/bin
+fish_add_path $VOLTA_HOME/bin
 set -U fish_user_paths $HOME/.cargo/bin $fish_user_paths
 
 # # pnpm completions
@@ -50,6 +54,7 @@ alias tmp='cd $HOME/tmp'
 alias h='cd $HOME'
 alias lsd='ls | lolcat'
 alias open='open-cli'
+alias gedit='flatpak run org.gnome.TextEditor'
 
 # findport `port`
 function findport
@@ -70,7 +75,7 @@ end
 
 ## # Add 'greeting message'
 function fish_greeting
-    PF_INFO="ascii title os kernel  de shell uptime" /usr/bin/pfetch
+    PF_INFO="ascii title os kernel  de shell uptime" pfetch
 end
 
 # Replace rm with a safer command

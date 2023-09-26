@@ -6,3 +6,9 @@ truncation_length=-1
 
 [username]
 show_always=true
+
+[custom.toolbox]
+when = """ test -e /run/.toolboxenv """
+command = "echo toolbox"
+prefix = "in "
+symbol = "⬢ "
