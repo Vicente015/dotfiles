@@ -1,5 +1,5 @@
 # 🪄 Dotfiles
-My personal dotfiles for [Nobara](https://nobaraproject.org/).
+My personal dotfiles for Fedora.
 These dotfiles are compatible with any distribution using dnf as package manager.
 
 ![image](.github/readme.png)
