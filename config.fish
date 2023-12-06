@@ -6,30 +6,55 @@ end
 set fish_greeting ""
 
 # # PATH
+# set -x ANDROID_BUILD_TOOLS "$ANDROID_HOME/build-tools/33.0.0/"
 set -gx VOLTA_HOME "$HOME/.volta"
 set -x PNPM_HOME "$HOME/.local/share/pnpm"
 set -x DENO_INSTALL "$HOME/.deno"
 set -x GOPATH "$HOME/.go"
 set -x ANDROID_HOME "$HOME/Android/Sdk"
-set -x ANDROID_BUILD_TOOLS "$ANDROID_HOME/build-tools/33.0.0/"
 set -x VOLTA_HOME "$HOME/.volta"
+set -x BUN_INSTALL "$HOME/.bun"
 
 # # Add folders to path
-fish_add_path $CHROMEDRIVER_PATH
-fish_add_path $ANDROID_BUILD_TOOLS
+# fish_add_path $CHROMEDRIVER_PATH
+# fish_add_path $ANDROID_BUILD_TOOLS
 fish_add_path $PNPM_HOME
 fish_add_path $GOPATH/bin
 fish_add_path $VOLTA_HOME/bin
 fish_add_path $DENO_INSTALL/bin
 fish_add_path $HOME/.local/bin
 fish_add_path $HOME/.cargo/bin
+fish_add_path $ANDROID_HOME/emulator
+fish_add_path $ANDROID_HOME/platform-tools
+fish_add_path $BUN_INSTALL/bin
 
 # # pnpm completions
 # tabtab source for packages
 # uninstall by removing these lines
 [ -f ~/.config/tabtab/fish/__tabtab.fish ]; and . ~/.config/tabtab/fish/__tabtab.fish; or true
 
-# Helpers
+# # Aliases
+alias i='cd $HOME/i'
+alias clones='cd $HOME/i/_clones'
+alias forks='cd $HOME/i/_forks'
+alias issues='cd $HOME/i/_issues'
+alias ii='cd $HOME/ii'
+alias v='cd $HOME/v'
+alias tmp='cd $HOME/tmp'
+alias h='cd $HOME'
+alias lsd='ls | lolcat'
+alias open='open-cli'
+alias gedit='flatpak run org.gnome.TextEditor'
+alias tbox='SHELL=/usr/bin/fish toolbox -r 38 enter'
+alias trun='SHELL=/usr/bin/fish toolbox -r 38 run $argv'
+alias firefox='flatpak-spawn --host firefox'
+alias code='flatpak run com.visualstudio.code'
+alias jrnl='toolbox -r 38 run jrnl'
+
+# Hide jrnl entries
+abbr --add jrnl " jrnl"
+
+# # Function Helpers
 function count_files
     find . -type f | wc -l
 end
@@ -42,26 +67,12 @@ function exifclear
     flatpak run fr.romainvigier.MetadataCleaner
 end
 
-# # Easy access to folders
-alias i='cd $HOME/i'
-alias clones='cd $HOME/i/_clones'
-alias forks='cd $HOME/i/_forks'
-alias issues='cd $HOME/i/_issues'
-alias ii='cd $HOME/ii'
-alias v='cd $HOME/v'
-alias tmp='cd $HOME/tmp'
-alias h='cd $HOME'
-alias lsd='ls | lolcat'
-alias open='open-cli'
-alias gedit='flatpak run org.gnome.TextEditor'
-alias tbox='SHELL=/usr/bin/fish toolbox enter'
-
 # findport `port`
 function findport
     lsof -nP -iTCP -sTCP:LISTEN | grep "$argv"
 end
 
-# # Replaces trash command to include clear subcommand
+# Replaces trash command to include clear subcommand
 # https://www.npmjs.com/package/trash-cli
 # https://www.npmjs.com/package/empty-trash-cli
 function trash
@@ -75,7 +86,7 @@ end
 
 # Add 'greeting message'
 function fish_greeting
-    PF_INFO="ascii title os kernel  de shell uptime" ~/.local/bin/pfetch
+    PF_INFO="ascii title os kernel de shell uptime" ~/.local/bin/pfetch
 end
 
 # Replace rm with a safer command

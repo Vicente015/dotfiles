@@ -10,5 +10,5 @@ show_always=true
 [custom.toolbox]
 when = """ test -e /run/.toolboxenv """
 command = "echo toolbox"
-prefix = "in "
+#prefix = "in "
 symbol = "⬢ "
