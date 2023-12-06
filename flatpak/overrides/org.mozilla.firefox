@@ -1,0 +1,6 @@
+[Context]
+devices=dri;
+filesystems=xdg-data/flatpak/runtime/org.kde.Platform:ro;xdg-run/kpxc_server:ro;xdg-pictures:ro;xdg-data/flatpak/app/org.keepassxc.KeePassXC:ro;xdg-run/app/org.keepassxc.KeePassXC:create;xdg-download;home;/var/lib/flatpak/app/org.keepassxc.KeePassXC:ro;/var/lib/flatpak/runtime/org.kde.Platform:ro;
+
+[Environment]
+MOZ_ENABLE_WAYLAND=1

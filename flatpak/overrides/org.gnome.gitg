@@ -1,0 +1,2 @@
+[Context]
+filesystems=!xdg-run/keyring;~/ii;~/i;~/clases;!host

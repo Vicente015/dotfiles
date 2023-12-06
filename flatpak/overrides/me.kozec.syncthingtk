@@ -1,2 +1,2 @@
 [Context]
-sockets=!fallback-x11;!x11
+filesystems=~/.var/app/;home;host-etc;host-os

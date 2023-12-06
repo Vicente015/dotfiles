@@ -1,2 +1,2 @@
-[System Bus Policy]
-org.freedesktop.secrets=talk
+[Context]
+filesystems=xdg-download:rw;xdg-pictures:ro
