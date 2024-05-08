@@ -20,6 +20,7 @@
 
 [core]
   pager = delta
+	editor = flatpak run re.sonny.Commit
 
 [delta]
   syntax-theme = OneHalfDark
