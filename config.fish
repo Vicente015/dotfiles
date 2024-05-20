@@ -36,8 +36,9 @@ fish_add_path $HOMEBREW_PREFIX/sbin
 # uninstall by removing these lines
 [ -f ~/.config/tabtab/fish/__tabtab.fish ]; and . ~/.config/tabtab/fish/__tabtab.fish; or true
 
-# # nb completions
+# # completions
 [ -f ~/.config/fish/completions/nb.fish ]; and . ~/.config/fish/completions/nb.fish; or true
+glow completion fish | source
 
 # brew
 if test -d (brew --prefix)"/share/fish/completions"
@@ -99,37 +100,49 @@ function trash
     end
 end
 
+function smartcat
+    for file in $argv
+        if string match -q -r '.*(\.jpg|\.jpeg|\.png|\.gif)$' -- $file
+            catimg $file
+        else if string match -q '*.md' -- $file
+            glow --local $file
+        else
+            bat --paging=never -n --theme="OneHalfDark" $file
+        end
+    end
+end
+
 # Add 'greeting message'
 function fish_greeting
     PF_INFO="ascii title os kernel de shell uptime" pfetch
 end
 
 # Replace rm with a safer command
-if command -v trash > /dev/null
-    unalias rm &> /dev/null
+if command -v trash >/dev/null
+    unalias rm &>/dev/null
     alias rm='trash'
 end
 
 # Replace ls
-if command -v eza > /dev/null
-    unalias ll &> /dev/null
-    unalias l &> /dev/null
-    unalias la &> /dev/null
-    unalias ls &> /dev/null
+if command -v eza >/dev/null
+    unalias ll &>/dev/null
+    unalias l &>/dev/null
+    unalias la &>/dev/null
+    unalias ls &>/dev/null
     alias ls='eza -G --color auto --icons -s type'
     alias ll='eza -l --color always --icons -a -s type'
 end
 
 # Replace cat
-if command -v bat > /dev/null
-    unalias cat &> /dev/null
-    alias cat='bat --paging=never -n --theme="OneHalfDark"'
+if command -v bat >/dev/null
+    unalias cat &>/dev/null
+    alias cat='smartcat'
 end
 
 # Wayland copy to clipboard
-if command -v wl-copy > /dev/null
-    unalias cb &> /dev/null
-    unalias pb &> /dev/null
+if command -v wl-copy >/dev/null
+    unalias cb &>/dev/null
+    unalias pb &>/dev/null
     alias cb='wl-copy'
     alias pb='wl-paste'
 end
