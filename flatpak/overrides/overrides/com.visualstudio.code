@@ -1,0 +1,12 @@
+[Context]
+sockets=gpg-agent;pcsc
+filesystems=~/i;~/ii;~/.typeChallenges;home;host-etc;host-os
+
+[Environment]
+PATH=/var/home/vicente/.local/bin:/var/home/vicente/.deno/bin:/var/home/vicente/.local/share/pnpm:/home/linuxbrew/.linuxbrew/sbin:/home/linuxbrew/.linuxbrew/bin:/var/home/vicente/.volta/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/app/bin:/app/bin:/app/bin:/usr/bin:/app/tools/fish/bin:/app/tools/podman/bin:/var/home/vicente/.var/app/com.visualstudio.code/data/node_modules/bi
+
+[System Bus Policy]
+org.gnome.keyring.SystemPrompter=talk
+
+[Session Bus Policy]
+org.gnome.keyring.SystemPrompter=talk

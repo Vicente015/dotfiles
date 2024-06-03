@@ -61,14 +61,14 @@ alias h='cd $HOME'
 alias lsd='ls | lolcat'
 alias open='open-cli'
 alias gedit='flatpak run org.gnome.TextEditor'
-alias tbox='SHELL=/usr/bin/fish toolbox -r 38 enter'
-alias trun='SHELL=/usr/bin/fish toolbox -r 38 run $argv'
+alias tbox='SHELL=/usr/bin/fish toolbox -r 39 enter'
+alias trun='SHELL=/usr/bin/fish toolbox -r 39 run $argv'
 alias firefox='flatpak-spawn --host firefox'
 alias code='flatpak run com.visualstudio.code'
 #alias code='toolbox run -c fedora-toolbox-38 /usr/share/code/code &'
 
 # Hide jrnl entries
-abbr --add jrnl " jrnl"
+# abbr --add jrnl " jrnl"
 
 # # Function Helpers
 function count_files
