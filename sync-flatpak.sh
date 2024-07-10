@@ -4,11 +4,11 @@
 set -e
 
 function export_apps() {
-  flatpak list --app --columns=application > ./flatpak/apps.txt
+  flatpak list --user --app --columns=application > ./flatpak/apps.txt
 }
 
-function install_apps() {
-  flatpak install -y $(grep "^[^#;]" ./flatpak/apps.txt | tr '\n' ' ')
+function import_apps() {
+  flatpak install --user -y $(grep "^[^#;]" ./flatpak/apps.txt | tr '\n' ' ')
 }
 
 function export_overrides() {
