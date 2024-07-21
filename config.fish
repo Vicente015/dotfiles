@@ -15,6 +15,9 @@ set -x ANDROID_HOME "$HOME/Android/Sdk"
 set -x VOLTA_HOME "$HOME/.volta"
 set -x BUN_INSTALL "$HOME/.bun"
 set -x HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew"
+set -x NB_MARKDOWN_TOOL "glow"
+set -x NB_DIRECTORY_TOOL "eza"
+set -x NB_IMAGE_TOOL "catimg"
 
 # # Add folders to path
 # fish_add_path $CHROMEDRIVER_PATH
