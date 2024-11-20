@@ -7,8 +7,13 @@ truncation_length=-1
 [username]
 show_always=true
 
+[cmd_duration]
+min_time=50
+show_milliseconds=true
+
 [nodejs]
 symbol = "🐢 "
+detect_extensions = []
 
 [custom.toolbox]
 when = """ test -e /run/.toolboxenv """
