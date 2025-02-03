@@ -42,8 +42,8 @@ volta install pnpm
 export PNPM_HOME="$HOME/.local/share/pnpm"
 export PATH="$PNPM_HOME:$PATH"
 
-echo "Installing global packages with pnpm eslint,pm2,envinfo,typescriot,trash-cli,share-cli,open-cli,antfu/ni,taze"
-pnpm add -g eslint pm2 envinfo typescript trash-cli empty-trash-cli share-cli @antfu/ni taze open-cli
+echo "Installing global packages with pnpm eslint,pm2,envinfo,typescriot,trash-cli,share-cli,open-cli,antfu/ni,taze,czg"
+pnpm add -g eslint pm2 envinfo typescript trash-cli empty-trash-cli share-cli @antfu/ni taze open-cli czg
 
 echo "Copying starship.toml"
 mkdir -p ~/.config &&
