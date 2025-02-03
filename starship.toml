@@ -11,12 +11,14 @@ show_always=true
 min_time=50
 show_milliseconds=true
 
-[nodejs]
-symbol = "🐢 "
-detect_extensions = []
-
 [custom.toolbox]
 when = """ test -e /run/.toolboxenv """
 command = "echo toolbox"
 #prefix = "in "
 symbol = "⬢ "
+
+[nodejs]
+symbol = "🐢 "
+detect_files = ['.node-version', '.nvmrc', 'pnpm-lock.yaml', 'package-lock.json', 'yarn.lock']
+detect_extensions = []
+detect_folders = []
