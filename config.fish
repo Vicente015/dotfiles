@@ -60,6 +60,7 @@ alias issues='cd $HOME/i/_issues'
 alias ii='cd $HOME/ii'
 alias v='cd $HOME/v'
 alias tmp='cd $HOME/tmp'
+alias garden='cd $HOME/v/notes/garden'
 alias h='cd $HOME'
 alias lsd='ls | lolcat'
 alias open='open-cli'
@@ -69,7 +70,7 @@ alias trun='SHELL=/usr/bin/fish toolbox -r 39 run $argv'
 alias firefox='flatpak-spawn --host firefox'
 alias code='flatpak run com.visualstudio.code'
 #alias code='toolbox run -c fedora-toolbox-38 /usr/share/code/code &'
-
+alias gc="czg"
 # Hide jrnl entries
 # abbr --add jrnl " jrnl"
 
