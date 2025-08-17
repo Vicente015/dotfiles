@@ -18,6 +18,7 @@ set -x HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew"
 set -x NB_MARKDOWN_TOOL "glow"
 set -x NB_DIRECTORY_TOOL "eza"
 set -x NB_IMAGE_TOOL "catimg"
+set -x EDITOR "/var/home/linuxbrew/.linuxbrew/bin/micro"
 
 # # Add folders to path
 # fish_add_path $CHROMEDRIVER_PATH
@@ -109,7 +110,7 @@ function smartcat
         if string match -q -r '.*(\.jpg|\.jpeg|\.png|\.gif)$' -- $file
             catimg $file
         else if string match -q '*.md' -- $file
-            glow --local $file
+            glow $file
         else
             bat --paging=never -n --theme="OneHalfDark" $file
         end
