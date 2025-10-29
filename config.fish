@@ -8,17 +8,18 @@ set fish_greeting ""
 # # PATH
 # set -x ANDROID_BUILD_TOOLS "$ANDROID_HOME/build-tools/33.0.0/"
 set -gx VOLTA_HOME "$HOME/.volta"
+set -gx HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew"
 set -x PNPM_HOME "$HOME/.local/share/pnpm"
 set -x DENO_INSTALL "$HOME/.deno"
 set -x GOPATH "$HOME/.go"
 set -x ANDROID_HOME "$HOME/Android/Sdk"
-set -x VOLTA_HOME "$HOME/.volta"
 set -x BUN_INSTALL "$HOME/.bun"
-set -x HOMEBREW_PREFIX "/home/linuxbrew/.linuxbrew"
 set -x NB_MARKDOWN_TOOL "glow"
 set -x NB_DIRECTORY_TOOL "eza"
 set -x NB_IMAGE_TOOL "catimg"
-set -x EDITOR "/var/home/linuxbrew/.linuxbrew/bin/micro"
+
+# Editor from the chosen Homebrew prefix
+set -x EDITOR "$HOMEBREW_PREFIX/bin/micro"
 
 # # Add folders to path
 # fish_add_path $CHROMEDRIVER_PATH
@@ -70,8 +71,10 @@ alias tbox='SHELL=/usr/bin/fish toolbox -r 39 enter'
 alias trun='SHELL=/usr/bin/fish toolbox -r 39 run $argv'
 alias firefox='flatpak-spawn --host firefox'
 alias code='flatpak run com.visualstudio.code'
+alias zed='flatpak run dev.zed.Zed'
 #alias code='toolbox run -c fedora-toolbox-38 /usr/share/code/code &'
 alias gc="czg"
+alias music='ncmpc'
 # Hide jrnl entries
 # abbr --add jrnl " jrnl"
 
