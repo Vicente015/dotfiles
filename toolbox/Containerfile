@@ -336,11 +336,13 @@ _show_container_limits() {
   echo -e "\e[1;34m  Container limits\e[0m  memory: \e[1;32m${mem_human}\e[0m  |  cpus: \e[1;32m${cpus}\e[0m"
 }
 
-# ── Welcome banner ────────────────────────────────────────────
-if command -v pfetch &>/dev/null; then
+# ── Welcome banner (interactive shells only) ─────────────────
+if [[ -t 1 ]] && command -v pfetch &>/dev/null; then
   pfetch
 fi
-_show_container_limits
+if [[ -t 1 ]]; then
+  _show_container_limits
+fi
 unset -f _show_container_limits
 
 # ── Starship prompt (from host brew via PATH) ─────────────────
