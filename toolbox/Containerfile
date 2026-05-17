@@ -311,6 +311,40 @@ trash() {
   esac
 }
 
+# ── Container limits (read from cgroup v2) ───────────────────
+_show_container_limits() {
+  local cgrel cgpath mem_bytes mem_human cpu_max cpu_quota cpu_period cpus
+  cgrel=$(grep '^0::' /proc/self/cgroup 2>/dev/null | cut -d: -f3)
+  cgpath="/sys/fs/cgroup${cgrel}"
+
+  # Memory
+  mem_bytes=$(cat "${cgpath}/memory.max" 2>/dev/null)
+  if [[ -n "$mem_bytes" && "$mem_bytes" != "max" ]]; then
+    mem_human=$(awk "BEGIN {printf \"%.0fG\", ${mem_bytes}/1073741824}")
+  else
+    mem_human="unlimited"
+  fi
+
+  # CPUs (quota/period — e.g. "200000 100000" = 2 CPUs)
+  cpu_max=$(cat "${cgpath}/cpu.max" 2>/dev/null)
+  cpu_quota=${cpu_max%% *}
+  cpu_period=${cpu_max##* }
+  if [[ "$cpu_quota" == "max" ]]; then
+    cpus="unlimited"
+  else
+    cpus=$(awk "BEGIN {printf \"%.0f\", ${cpu_quota}/${cpu_period}}")
+  fi
+
+  echo -e "\e[1;34m  Container limits\e[0m  memory: \e[1;32m${mem_human}\e[0m  |  cpus: \e[1;32m${cpus}\e[0m"
+}
+
+# ── Welcome banner ────────────────────────────────────────────
+if command -v pfetch &>/dev/null; then
+  pfetch
+fi
+_show_container_limits
+unset -f _show_container_limits
+
 # ── Starship prompt (from host brew via PATH) ─────────────────
 export STARSHIP_CONFIG="/etc/starship/starship.toml"
 if command -v starship &>/dev/null; then
