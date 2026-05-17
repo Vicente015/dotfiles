@@ -313,23 +313,24 @@ trash() {
 
 # ── Container limits (read from cgroup v2) ───────────────────
 _show_container_limits() {
-  local cgrel cgpath mem_bytes mem_human cpu_max cpu_quota cpu_period cpus
+  local cgrel cgpath mem_bytes mem_human cpu_quota cpu_period cpus
   cgrel=$(grep '^0::' /proc/self/cgroup 2>/dev/null | cut -d: -f3)
   cgpath="/sys/fs/cgroup${cgrel}"
 
-  # Memory
-  mem_bytes=$(cat "${cgpath}/memory.max" 2>/dev/null)
-  if [[ -n "$mem_bytes" && "$mem_bytes" != "max" ]]; then
-    mem_human=$(awk "BEGIN {printf \"%.0fG\", ${mem_bytes}/1073741824}")
-  else
+  # Memory — treat "max" and values >= total RAM as unlimited
+  mem_bytes=$(cat "${cgpath}/memory.max" 2>/dev/null | tr -d '[:space:]')
+  local total_mem
+  total_mem=$(awk '/MemTotal/ {print $2 * 1024}' /proc/meminfo 2>/dev/null)
+  if [[ -z "$mem_bytes" || "$mem_bytes" == "max" ]] || \
+     [[ "$mem_bytes" =~ ^[0-9]+$ && -n "$total_mem" && "$mem_bytes" -ge "$total_mem" ]]; then
     mem_human="unlimited"
+  else
+    mem_human=$(awk "BEGIN {printf \"%.0fG\", ${mem_bytes}/1073741824}")
   fi
 
-  # CPUs (quota/period — e.g. "200000 100000" = 2 CPUs)
-  cpu_max=$(cat "${cgpath}/cpu.max" 2>/dev/null)
-  cpu_quota=${cpu_max%% *}
-  cpu_period=${cpu_max##* }
-  if [[ "$cpu_quota" == "max" ]]; then
+  # CPUs — "max <period>" means no limit; otherwise quota/period = CPU count
+  read -r cpu_quota cpu_period < <(cat "${cgpath}/cpu.max" 2>/dev/null)
+  if [[ -z "$cpu_quota" || "$cpu_quota" == "max" ]]; then
     cpus="unlimited"
   else
     cpus=$(awk "BEGIN {printf \"%.0f\", ${cpu_quota}/${cpu_period}}")
