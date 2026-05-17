@@ -208,14 +208,16 @@ fi
 # Standard interactive usage: renders markdown via glow
 ai() {
   local kagi_json
-  kagi_json=$(kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1")
+  # KAGI_TIMEOUT: 600s prevents shell tool hangs when kagi assistant takes >60s
+  kagi_json=$(timeout 600 kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1")
   LAST_THREAD_ID=$(echo "$kagi_json" | jq -r '.thread.id')
   echo "$kagi_json" | jq -r '"Thread: \(.thread.id)\n\n\(.message.markdown)\n\n\(.message.references_markdown)"' | glow
 }
 
 aic() {
   local kagi_json
-  kagi_json=$(kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d --thread-id "$LAST_THREAD_ID" "$1")
+  # KAGI_TIMEOUT: 600s prevents shell tool hangs when kagi assistant takes >60s
+  kagi_json=$(timeout 600 kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d --thread-id "$LAST_THREAD_ID" "$1")
   LAST_THREAD_ID=$(echo "$kagi_json" | jq -r '.thread.id')
   echo "$kagi_json" | jq -r '"Thread: \(.thread.id)\n\n\(.message.markdown)\n\n\(.message.references_markdown)"' | glow
 }
@@ -228,7 +230,8 @@ aic() {
 #   RESULT=$(ai_raw "what is X")      → capture in variable
 ai_raw() {
   local kagi_json
-  kagi_json=$(kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1")
+  # KAGI_TIMEOUT: 600s prevents shell tool hangs when kagi assistant takes >60s
+  kagi_json=$(timeout 600 kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1")
   AI_LAST_THREAD_ID=$(echo "$kagi_json" | jq -r '.thread.id')
   echo "$kagi_json" | jq -r '.message.markdown'
 }
@@ -238,7 +241,8 @@ ai_raw() {
 #   aic_raw "follow-up question"
 aic_raw() {
   local kagi_json
-  kagi_json=$(kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d --thread-id "$AI_LAST_THREAD_ID" "$1")
+  # KAGI_TIMEOUT: 600s prevents shell tool hangs when kagi assistant takes >60s
+  kagi_json=$(timeout 600 kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d --thread-id "$AI_LAST_THREAD_ID" "$1")
   AI_LAST_THREAD_ID=$(echo "$kagi_json" | jq -r '.thread.id')
   echo "$kagi_json" | jq -r '.message.markdown'
 }
@@ -247,7 +251,8 @@ aic_raw() {
 # For agents that need to parse references, thread ID, etc.
 #   ai_json "query" | jq '.message.references'
 ai_json() {
-  kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1"
+  # KAGI_TIMEOUT: 600s prevents shell tool hangs when kagi assistant takes >60s
+  timeout 600 kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1"
 }
 
 # ── Navigation aliases ────────────────────────────────────────
