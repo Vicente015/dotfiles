@@ -317,19 +317,16 @@ _show_container_limits() {
   cgrel=$(grep '^0::' /proc/self/cgroup 2>/dev/null | cut -d: -f3)
   cgpath="/sys/fs/cgroup${cgrel}"
 
-  # Memory — treat "max" and values >= total RAM as unlimited
-  mem_bytes=$(cat "${cgpath}/memory.max" 2>/dev/null | tr -d '[:space:]')
-  local total_mem
-  total_mem=$(awk '/MemTotal/ {print $2 * 1024}' /proc/meminfo 2>/dev/null)
-  if [[ -z "$mem_bytes" || "$mem_bytes" == "max" ]] || \
-     [[ "$mem_bytes" =~ ^[0-9]+$ && -n "$total_mem" && "$mem_bytes" -ge "$total_mem" ]]; then
+  # Memory — cgroup v2: "max" = no limit, numeric = bytes
+  mem_bytes=$(command cat "${cgpath}/memory.max" 2>/dev/null | tr -d '[:space:]')
+  if [[ -z "$mem_bytes" || "$mem_bytes" == "max" ]]; then
     mem_human="unlimited"
   else
     mem_human=$(awk "BEGIN {printf \"%.0fG\", ${mem_bytes}/1073741824}")
   fi
 
   # CPUs — "max <period>" means no limit; otherwise quota/period = CPU count
-  read -r cpu_quota cpu_period < <(cat "${cgpath}/cpu.max" 2>/dev/null)
+  read -r cpu_quota cpu_period < <(command cat "${cgpath}/cpu.max" 2>/dev/null)
   if [[ -z "$cpu_quota" || "$cpu_quota" == "max" ]]; then
     cpus="unlimited"
   else

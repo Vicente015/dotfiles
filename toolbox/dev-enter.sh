@@ -181,10 +181,12 @@ case "${1:-run}" in
       VOLUME_FLAGS=()
       build_volume_flags VOLUME_FLAGS
 
-      # Resource limits (opt-out via env vars)
+      # Resource limits (opt-out via env vars; defaults: half RAM, half CPUs)
+      _default_cpus=$(( $(nproc) / 2 ))
+      _default_mem=$(( $(awk '/MemTotal/{print $2}' /proc/meminfo) / 2 / 1024 / 1024 ))g
       RESOURCE_FLAGS=()
-      [[ -n "${AI_CONTAINER_MEMORY:-4g}" ]] && RESOURCE_FLAGS+=("--memory" "${AI_CONTAINER_MEMORY:-4g}")
-      [[ -n "${AI_CONTAINER_CPUS:-2}" ]] && RESOURCE_FLAGS+=("--cpus" "${AI_CONTAINER_CPUS:-2}")
+      [[ -n "${AI_CONTAINER_MEMORY:-${_default_mem}}" ]] && RESOURCE_FLAGS+=("--memory" "${AI_CONTAINER_MEMORY:-${_default_mem}}")
+      [[ -n "${AI_CONTAINER_CPUS:-${_default_cpus}}" ]] && RESOURCE_FLAGS+=("--cpus" "${AI_CONTAINER_CPUS:-${_default_cpus}}")
 
       TMPDIR="${HOME_DIR}/tmp" $PODMAN create \
         --name "$CONTAINER" \
