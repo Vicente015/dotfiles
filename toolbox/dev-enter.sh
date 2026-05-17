@@ -22,7 +22,7 @@ set -euo pipefail
 IMAGE="localhost/dev-toolbox:latest"
 HOME_DIR="/var/home/vicente"
 PODMAN="${PODMAN:-$(command -v podman 2>/dev/null || echo /run/host/usr/bin/podman)}"
-MASKS_DIR="${HOME_DIR}/tmp/masks"
+MASKS_DIR="${HOME_DIR}/.local/share/dev-toolbox/masks"
 TOOLBOX_PATH="${TOOLBOX_PATH:-/usr/bin/toolbox}"
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 
@@ -47,8 +47,9 @@ mkdir -p "$TMPDIR"
 
 # ── Sensitive dirs: empty read-only bind-mounts ───────────────
 # tmpfs on subdir of a mounted volume fails on Silverblue (crun bug).
-# Solution: bind-mount empty dirs from $HOME/tmp/masks instead.
+# Solution: bind-mount empty dirs from $HOME/.local/share/dev-toolbox/masks instead.
 # Effect: dirs appear empty AND are read-only inside the container.
+mkdir -p "${HOME_DIR}/.local/share/dev-toolbox"
 mkdir -p "${MASKS_DIR}"/{ssh,gnupg,pki,putty,secrets}
 chmod 700 "${MASKS_DIR}"/{ssh,gnupg,pki,putty,secrets}
 
@@ -64,6 +65,13 @@ MASKED_DIRS=(
 MASKED_FILES=(
   "${HOME_DIR}/.npmrc"
   "${HOME_DIR}/.kagi.toml"
+  "${HOME_DIR}/.config/opencode/opencode.json"
+)
+
+# Conditional masked dirs: only mounted if the target dir exists on the host
+CONDITIONAL_MASKED_DIRS=(
+  "${HOME_DIR}/.config/gh"
+  "${HOME_DIR}/.config/gopass"
 )
 
 # ── Build volume flags ────────────────────────────────────────
@@ -90,9 +98,13 @@ build_volume_flags() {
       "${HOME_DIR}/.local/bin"
       "${HOME_DIR}/.cache"
       "${HOME_DIR}/.config"
-      "${HOME_DIR}/.engram"
       "${HOME_DIR}/.agents"
       "${HOME_DIR}/tmp"
+    )
+
+    # Read-only scoped volumes (sensitive stores that must not be written from the container)
+    local RO_SCOPED_VOLUMES=(
+      "${HOME_DIR}/.engram"
     )
 
     # Mount project dir
@@ -101,6 +113,11 @@ build_volume_flags() {
     # Mount each allowlist entry only if it exists on the host
     for dir in "${SCOPED_VOLUMES[@]}"; do
       [[ -d "$dir" ]] && _flags+=("--volume" "${dir}:${dir}:rw")
+    done
+
+    # Read-only scoped volumes
+    for dir in "${RO_SCOPED_VOLUMES[@]}"; do
+      [[ -d "$dir" ]] && _flags+=("--volume" "${dir}:${dir}:ro")
     done
   else
     # Legacy: full $HOME mount (backward compatibility)
@@ -117,6 +134,15 @@ build_volume_flags() {
   # Masked files: /dev/null override
   for file in "${MASKED_FILES[@]}"; do
     _flags+=("--volume" "/dev/null:${file}:ro")
+  done
+
+  # Conditional masked dirs: only mounted if the target dir exists on the host
+  for dst in "${CONDITIONAL_MASKED_DIRS[@]}"; do
+    local mask_name
+    mask_name=$(basename "$dst")
+    local src="${MASKS_DIR}/${mask_name}"
+    mkdir -p "$src" && chmod 700 "$src"
+    [[ -d "$dst" ]] && _flags+=("--volume" "${src}:${dst}:ro")
   done
 }
 
@@ -155,6 +181,11 @@ case "${1:-run}" in
       VOLUME_FLAGS=()
       build_volume_flags VOLUME_FLAGS
 
+      # Resource limits (opt-out via env vars)
+      RESOURCE_FLAGS=()
+      [[ -n "${AI_CONTAINER_MEMORY:-4g}" ]] && RESOURCE_FLAGS+=("--memory" "${AI_CONTAINER_MEMORY:-4g}")
+      [[ -n "${AI_CONTAINER_CPUS:-2}" ]] && RESOURCE_FLAGS+=("--cpus" "${AI_CONTAINER_CPUS:-2}")
+
       TMPDIR="${HOME_DIR}/tmp" $PODMAN create \
         --name "$CONTAINER" \
         --label "com.github.containers.toolbox=true" \
@@ -174,6 +205,7 @@ case "${1:-run}" in
         --env "TOOLBOX_PATH=${TOOLBOX_PATH}" \
         --env "XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}" \
         "${VOLUME_FLAGS[@]}" \
+        "${RESOURCE_FLAGS[@]}" \
         "$IMAGE" \
         toolbox --log-level debug init-container \
           --gid "$(id -g)" \
@@ -211,6 +243,12 @@ case "${1:-run}" in
 
     WORKDIR="${PWD:-${HOME_DIR}}"
     [[ "$WORKDIR" == / || ! -d "$WORKDIR" ]] && WORKDIR="${HOME_DIR}"
+
+    # Append-only host-side audit log
+    _AI_AUDIT_LOG="${HOME_DIR}/tmp/ai-audit.log"
+    mkdir -p "${HOME_DIR}/tmp"
+    [[ ! -f "$_AI_AUDIT_LOG" ]] && touch "$_AI_AUDIT_LOG" && chmod 600 "$_AI_AUDIT_LOG"
+    echo "[$(date -Iseconds)] [${CONTAINER}] [$(id -un)] CMD: $*" >> "$_AI_AUDIT_LOG"
 
     exec $PODMAN exec --user "$(id -un)" --workdir "$WORKDIR" \
       ${KAGI_SESSION_TOKEN:+--env "KAGI_SESSION_TOKEN=${KAGI_SESSION_TOKEN}"} \
