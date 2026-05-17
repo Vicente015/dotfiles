@@ -11,18 +11,33 @@
 # The real protection is read-only mounts + VSCode sandbox (chat.agent.sandbox).
 #
 # Usage:
-#   ~/.config/toolbox/dev-enter.sh            # create if needed, then enter
-#   ~/.config/toolbox/dev-enter.sh --destroy  # remove container
+#   ~/.config/toolbox/dev-enter.sh                 # create if needed, then enter
+#   ~/.config/toolbox/dev-enter.sh --build         # rebuild the dev-toolbox image
+#   ~/.config/toolbox/dev-enter.sh --destroy       # remove container for current project (or 'dev')
+#   ~/.config/toolbox/dev-enter.sh --destroy --all # remove ALL dev-* containers
+#   ~/.config/toolbox/dev-enter.sh --list          # list all dev-* containers with status
 
 set -euo pipefail
 
-CONTAINER="dev"
 IMAGE="localhost/dev-toolbox:latest"
 HOME_DIR="/var/home/vicente"
 PODMAN="${PODMAN:-$(command -v podman 2>/dev/null || echo /run/host/usr/bin/podman)}"
 MASKS_DIR="${HOME_DIR}/tmp/masks"
 TOOLBOX_PATH="${TOOLBOX_PATH:-/usr/bin/toolbox}"
 XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+# ── Slug derivation: derive per-project container name ────────
+GIT_ROOT=$(git -C "${PWD}" rev-parse --show-toplevel 2>/dev/null || true)
+if [[ -n "$GIT_ROOT" ]]; then
+  PROJECT_SLUG=$(basename "$GIT_ROOT")
+  CONTAINER="dev-${PROJECT_SLUG}"
+  PROJECT_DIR="$GIT_ROOT"
+  SCOPED=true
+else
+  CONTAINER="dev"
+  SCOPED=false
+  PROJECT_DIR=""
+fi
 
 # ── Fix Silverblue composefs "no space left" ──────────────────
 # crun resolves TMPDIR for overlay operations. Without this,
@@ -48,40 +63,97 @@ MASKED_DIRS=(
 # Files masked via /dev/null bind-mount (renders file empty + read-only)
 MASKED_FILES=(
   "${HOME_DIR}/.npmrc"
+  "${HOME_DIR}/.kagi.toml"
 )
+
+# ── Build volume flags ────────────────────────────────────────
+build_volume_flags() {
+  local -n _flags=$1
+
+  _flags=(
+    "--volume" "/:/run/host:rslave"
+    "--volume" "/dev:/dev:rslave"
+    "--volume" "${XDG_RUNTIME_DIR}:${XDG_RUNTIME_DIR}:rslave"
+    "--volume" "${TOOLBOX_PATH}:/usr/bin/toolbox:ro"
+  )
+
+  if [[ "$SCOPED" == true ]]; then
+    # Scoped mount: project dir + explicit tool allowlist
+    local SCOPED_VOLUMES=(
+      "${HOME_DIR}/.volta"
+      "${HOME_DIR}/.bun"
+      "${HOME_DIR}/.cargo"
+      "${HOME_DIR}/.deno"
+      "${HOME_DIR}/.go"
+      "${HOME_DIR}/.cache/go-build"
+      "${HOME_DIR}/.local/share/pnpm"
+      "${HOME_DIR}/.local/bin"
+      "${HOME_DIR}/.cache"
+      "${HOME_DIR}/.config"
+      "${HOME_DIR}/.engram"
+      "${HOME_DIR}/.agents"
+      "${HOME_DIR}/tmp"
+    )
+
+    # Mount project dir
+    _flags+=("--volume" "${PROJECT_DIR}:${PROJECT_DIR}:rw")
+
+    # Mount each allowlist entry only if it exists on the host
+    for dir in "${SCOPED_VOLUMES[@]}"; do
+      [[ -d "$dir" ]] && _flags+=("--volume" "${dir}:${dir}:rw")
+    done
+  else
+    # Legacy: full $HOME mount (backward compatibility)
+    _flags+=("--volume" "${HOME_DIR}:${HOME_DIR}:rslave")
+  fi
+
+  # Masked dirs: empty dir overrides (read-only, appear empty)
+  for mapping in "${MASKED_DIRS[@]}"; do
+    local src="${mapping%%:*}"
+    local dst="${mapping##*:}"
+    _flags+=("--volume" "${src}:${dst}:ro")
+  done
+
+  # Masked files: /dev/null override
+  for file in "${MASKED_FILES[@]}"; do
+    _flags+=("--volume" "/dev/null:${file}:ro")
+  done
+}
 
 # ── Commands ──────────────────────────────────────────────────
 case "${1:-run}" in
+  --build)
+    echo "[dev-toolbox] Building image '${IMAGE}'..."
+    CONTAINERFILE="${HOME_DIR}/.config/toolbox/Containerfile"
+    TMPDIR="${HOME_DIR}/tmp" $PODMAN build -f "$CONTAINERFILE" -t "$IMAGE" "${HOME_DIR}/.config/toolbox"
+    echo "[dev-toolbox] Build complete."
+    ;;
+
   --destroy)
-    echo "[dev-toolbox] Removing container '${CONTAINER}'..."
-    toolbox rm -f "$CONTAINER"
-    echo "Done."
+    if [[ "${2:-}" == "--all" ]]; then
+      echo "[dev-toolbox] Removing all dev-* containers..."
+      ids=$($PODMAN ps -a --filter 'name=^dev-' -q 2>/dev/null || true)
+      [[ -n "$ids" ]] && $PODMAN rm -f $ids
+      toolbox rm -f dev 2>/dev/null || true
+      echo "Done."
+    else
+      echo "[dev-toolbox] Removing container '${CONTAINER}'..."
+      toolbox rm -f "$CONTAINER" 2>/dev/null || $PODMAN rm -f "$CONTAINER" 2>/dev/null || true
+      echo "Done."
+    fi
+    ;;
+
+  --list)
+    $PODMAN ps -a --filter label=com.github.containers.toolbox=true \
+      --format 'table {{.Names}}\t{{.Status}}'
     ;;
 
   run|"")
     if ! $PODMAN container exists "$CONTAINER" 2>/dev/null; then
       echo "[dev-toolbox] Creating container '${CONTAINER}'..."
 
-      # Build volume flags — order matters: home first, then overrides
-      VOLUME_FLAGS=(
-        "--volume" "/:/run/host:rslave"
-        "--volume" "/dev:/dev:rslave"
-        "--volume" "${HOME_DIR}:${HOME_DIR}:rslave"
-        "--volume" "${XDG_RUNTIME_DIR}:${XDG_RUNTIME_DIR}:rslave"
-        "--volume" "${TOOLBOX_PATH}:/usr/bin/toolbox:ro"
-      )
-
-      # Masked dirs: empty dir overrides (read-only, appear empty)
-      for mapping in "${MASKED_DIRS[@]}"; do
-        src="${mapping%%:*}"
-        dst="${mapping##*:}"
-        VOLUME_FLAGS+=("--volume" "${src}:${dst}:ro")
-      done
-
-      # Masked files: /dev/null override
-      for file in "${MASKED_FILES[@]}"; do
-        VOLUME_FLAGS+=("--volume" "/dev/null:${file}:ro")
-      done
+      VOLUME_FLAGS=()
+      build_volume_flags VOLUME_FLAGS
 
       TMPDIR="${HOME_DIR}/tmp" $PODMAN create \
         --name "$CONTAINER" \
@@ -108,8 +180,7 @@ case "${1:-run}" in
           --home "${HOME_DIR}" \
           --shell /bin/bash \
           --uid "$(id -u)" \
-          --user "$(id -un)" \
-          --home-link
+          --user "$(id -un)"
 
       echo "[dev-toolbox] Container '${CONTAINER}' created."
     fi
@@ -147,7 +218,7 @@ case "${1:-run}" in
     ;;
 
   *)
-    echo "Usage: $0 [--destroy | -c <command>]"
+    echo "Usage: $0 [--build | --destroy [--all] | --list | -c <command>]"
     exit 1
     ;;
 esac

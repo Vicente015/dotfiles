@@ -48,7 +48,7 @@
 # first login via dev.sh to integrate with opencode and bash.
 # ============================================================
 
-FROM registry.fedoraproject.org/fedora-toolbox:42
+FROM registry.fedoraproject.org/fedora-toolbox:44
 
 # Required label for toolbox to recognize this image
 LABEL com.github.containers.toolbox="true"
@@ -105,19 +105,22 @@ RUN git config --system user.name "Vicente" && \
     git config --system diff.colorMoved zebra && \
     git config --system commit.gpgsign false
 
+# ── Homebrew symlink (build-time) ────────────────────────────
+# Brew binaries hardcode /home/linuxbrew/.linuxbrew as ELF interpreter path.
+# The host brew lives at /run/host/home/linuxbrew inside the container, so we
+# create a symlink at build time so the interpreter is found on first login.
+RUN ln -sfn /run/host/home/linuxbrew /home/linuxbrew
+
 # ── Starship config ──────────────────────────────────────────
 RUN mkdir -p /etc/starship
 COPY --chmod=644 starship.toml /etc/starship/starship.toml
 
 # ── Bash environment — /etc/bashrc.d/dev.sh ─────────────────
 RUN mkdir -p /etc/bashrc.d && cat > /etc/bashrc.d/dev.sh << 'BASHRC'
-# ── Homebrew symlink (runtime, not build-time) ────────────────
-# brew binaries need /home/linuxbrew/.linuxbrew as ELF interpreter path.
-# Run as root at container start — toolbox init-container handles this.
-if [ -d /run/host/home/linuxbrew ] && [ ! -L /home/linuxbrew ]; then
-  rm -rf /home/linuxbrew 2>/dev/null || true
-  ln -sfn /run/host/home/linuxbrew /home/linuxbrew 2>/dev/null || true
-fi
+# Skip interactive setup when running as root (e.g. during toolbox init-container).
+[ "$(id -u)" -eq 0 ] && return 0
+# Skip if $HOME is not a real user home (e.g. during init-container user setup).
+[[ "$HOME" == "/" || -z "$HOME" || "$HOME" == "/root" ]] && return 0
 
 # ── Homebrew (host install, accessible via /run/host) ────────
 # /home/linuxbrew is outside $HOME so toolbox doesn't mount it,
