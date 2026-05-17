@@ -114,6 +114,21 @@ if test -f "$HOME/.gitconfig"; then
 fi
 ln -s "$DIR/gitconfig" ~/.gitconfig
 
+echo "Linking global gitignore"
+ln -sf "$DIR/gitignore" "$HOME/.gitignore"
+
+echo "Linking ripgrep config"
+mkdir -p ~/.config/ripgrep
+ln -sf "$DIR/ripgreprc" ~/.config/ripgrep/config
+
+echo "Linking bat config"
+mkdir -p ~/.config/bat
+ln -sf "$DIR/batconfig" ~/.config/bat/config
+
+echo "Linking pnpm config"
+mkdir -p ~/.config/pnpm
+ln -sf "$DIR/pnpm-config.yaml" ~/.config/pnpm/rc
+
 echo "Installing PNPM autocompletion in fish"
 pnpm install-completion
 
@@ -122,6 +137,35 @@ if test -f "$HOME/.config/fish/config.fish"; then
   mv ~/.config/fish/config.fish ~/.config/fish/config.fish.backup
 fi
 ln -s "$DIR/config.fish" ~/.config/fish/config.fish
+
+echo "Linking fish functions"
+mkdir -p ~/.config/fish/functions
+for f in "$DIR/functions/"*.fish; do
+  fname=$(basename "$f")
+  if test -f "$HOME/.config/fish/functions/$fname"; then
+    mv "$HOME/.config/fish/functions/$fname" "$HOME/.config/fish/functions/$fname.backup"
+  fi
+  ln -s "$f" "$HOME/.config/fish/functions/$fname"
+done
+
+echo "Setting up kagi.toml"
+if test -f "$HOME/.kagi.toml"; then
+  echo "  ~/.kagi.toml already exists — skipping (add [profile.mcp] manually from kagi.toml.template)"
+else
+  cp "$DIR/kagi.toml.template" "$HOME/.kagi.toml"
+  echo "  Copied kagi.toml.template → ~/.kagi.toml — fill in your session token"
+fi
+
+echo "Setting up dev-toolbox"
+mkdir -p ~/.config/toolbox
+for f in "$DIR/toolbox/"*; do
+  fname=$(basename "$f")
+  target="$HOME/.config/toolbox/$fname"
+  if test -f "$target" && ! test -L "$target"; then
+    mv "$target" "$target.backup"
+  fi
+  ln -sf "$f" "$target"
+done
 
 # * create customs dirs
 # mkdir $HOME/i $HOME/ii $HOME/v $HOME/temp

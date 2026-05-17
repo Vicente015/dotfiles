@@ -1,0 +1,11 @@
+# Kagi CLI configuration
+# Copy to ~/.kagi.toml and fill in your session token.
+# Get your token from: https://kagi.com/settings?p=user_details
+
+[auth]
+session_token = "YOUR_KAGI_SESSION_TOKEN_HERE"
+
+# Profile used by VSCode Copilot MCP server (kagi mcp --profile mcp)
+# Points to the "LLM" custom assistant — coding docs, concise markdown answers.
+[profile.mcp]
+assistant = "776a11a1-cb07-4d3e-8b02-b5d1e313235d"

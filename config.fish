@@ -17,9 +17,13 @@ set -x BUN_INSTALL "$HOME/.bun"
 set -x NB_MARKDOWN_TOOL "glow"
 set -x NB_DIRECTORY_TOOL "eza"
 set -x NB_IMAGE_TOOL "catimg"
-
+# Secret tokens — loaded from .env.secrets (not committed to git)
+if test -f "$HOME/dotfiles/.env.secrets"
+    envsource "$HOME/dotfiles/.env.secrets"
+end
 # Editor from the chosen Homebrew prefix
 set -x EDITOR "$HOMEBREW_PREFIX/bin/micro"
+set -x RIPGREP_CONFIG_PATH "$HOME/.config/ripgrep/config"
 
 # # Add folders to path
 # fish_add_path $CHROMEDRIVER_PATH
@@ -120,6 +124,20 @@ function smartcat
     end
 end
 
+function ai
+    set -l kagi_json (kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$argv[1]")
+    set -g last_thread_id (echo $kagi_json | jq -r '.thread.id')
+
+    echo $kagi_json | jq -r '"Thread: \(.thread.id)\n\n\(.message.markdown)\n\n\(.message.references_markdown)"' | glow
+end
+
+function aic
+    set -l kagi_json (kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d --thread-id $last_thread_id "$argv[1]")
+    set -g last_thread_id (echo $kagi_json | jq -r '.thread.id')
+
+    echo $kagi_json | jq -r '"Thread: \(.thread.id)\n\n\(.message.markdown)\n\n\(.message.references_markdown)"' | glow
+end
+
 # Add 'greeting message'
 function fish_greeting
     PF_INFO="ascii title os kernel de shell uptime" pfetch
@@ -156,3 +174,6 @@ if command -v wl-copy >/dev/null
 end
 
 starship init fish | source
+
+# opencode
+fish_add_path /var/home/vicente/.opencode/bin

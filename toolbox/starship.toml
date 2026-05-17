@@ -1,0 +1,24 @@
+command_timeout = 10000
+
+[directory]
+truncate_to_repo=false
+truncation_length=-1
+
+[cmd_duration]
+min_time=50
+show_milliseconds=true
+
+[custom.toolbox]
+when = """ test -e /run/.toolboxenv """
+command = "echo toolbox"
+#prefix = "in "
+symbol = "⬢ "
+
+[nodejs]
+symbol = "🐢 "
+detect_files = ['.node-version', '.nvmrc', 'pnpm-lock.yaml', 'package-lock.json', 'yarn.lock']
+detect_extensions = []
+detect_folders = []
+
+[username]
+show_always = true

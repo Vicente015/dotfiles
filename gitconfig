@@ -18,9 +18,14 @@
 [pull]
   rebase = true
 
+[push]
+  default = current
+  followtags = true
+
 [core]
   pager = delta
   editor = flatpak run re.sonny.Commit
+  excludesfile = ~/.gitignore
 
 [delta]
   syntax-theme = OneHalfDark
@@ -34,3 +39,18 @@
 
 [diff]
   colorMoved = zebra
+  algorithm = histogram
+  indentHeuristic = true
+
+[rerere]
+  enabled = true
+
+[alias]
+  s  = status --short --branch
+  d  = diff
+  a  = "!git add . && git s"
+  h  = "!git push origin HEAD"
+  l  = "!git pull origin HEAD --rebase"
+  hf = push --force-with-lease
+  sw = switch
+  current-branch = "!git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \\(.*\\)/\\1/'"

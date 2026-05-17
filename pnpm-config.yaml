@@ -1,0 +1,4 @@
+blockExoticSubdeps: true
+minimumReleaseAge: 1440
+storeDir: ~/.local/share/pnpm/store
+only-built-dependencies:

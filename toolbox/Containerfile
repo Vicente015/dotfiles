@@ -1,0 +1,331 @@
+# ============================================================
+# dev-toolbox — Fedora-based isolated development container
+# Toolbox-compatible image with Vicente's dev preferences
+#
+# Build:
+#   podman build -f ~/.config/toolbox/Containerfile \
+#     -t dev-toolbox:latest ~/.config/toolbox
+#
+# Create hardened container (use script, NOT toolbox create):
+#   ~/.config/toolbox/dev-enter.sh --create
+#
+# Enter:
+#   ~/.config/toolbox/dev-enter.sh
+#
+# VSCode terminal profile uses dev-enter.sh directly.
+#
+# Security model:
+#   - tmpfs masks: ~/.ssh, ~/.gnupg, ~/.kagi.toml, ~/secrets,
+#     ~/.npmrc, ~/.pki, ~/.putty — unreadable inside container
+#   - no-new-privileges: sudo/setuid blocked
+#   - Homebrew at /run/host still works (read-only host mount)
+#   - GPG signing disabled in gitconfig (gpgsign=false) so
+#     masking ~/.gnupg has no operational impact
+#
+# ── What is and isn't installed here ────────────────────────
+#
+# toolbox mounts $HOME automatically, so these are AVAILABLE
+# without installing anything:
+#   - volta, node, pnpm, deno, bun  (~/.volta, ~/.bun, ~/.local/share/pnpm)
+#   - ~/.cargo/bin tools
+#   - ~/.local/bin tools (pfetch, etc.)
+#
+# Homebrew (/home/linuxbrew/.linuxbrew) is NOT auto-mounted
+# because it lives outside $HOME. It is accessible at
+# /run/host/home/linuxbrew/.linuxbrew inside the container.
+# The PATH in dev.sh points there so all brew tools work:
+#   starship, eza, bat, glow, kagi, git-delta, zoxide, czg, etc.
+#
+# DNF installs ONLY what is not covered by ~ or /run/host brew:
+#   - system libs needed for native node addons / builds
+#   - ripgrep, fd-find, zoxide, lolcat, wl-clipboard (not in brew prefix)
+#   - git, gnupg2, lsof, htop, podman-remote, skopeo
+#   - fzf
+#
+# RTK (Rust Token Killer) is installed as a static musl binary
+# from GitHub releases — zero runtime dependencies, works in any
+# container without brew or cargo. Configured automatically at
+# first login via dev.sh to integrate with opencode and bash.
+# ============================================================
+
+FROM registry.fedoraproject.org/fedora-toolbox:42
+
+# Required label for toolbox to recognize this image
+LABEL com.github.containers.toolbox="true"
+
+# ── System packages (only what's NOT available via ~ or /run/host brew) ──
+RUN dnf -y update && dnf -y install \
+    # Core shell / utils
+    bash \
+    bash-completion \
+    util-linux \
+    procps-ng \
+    # Version control + GPG (for commit signing via host ~/.gnupg)
+    git \
+    git-lfs \
+    gnupg2 \
+    # Build essentials (native node addons, compilation)
+    gcc \
+    gcc-c++ \
+    make \
+    cmake \
+    python3 \
+    python3-pip \
+    # CLI tools not available via /run/host brew path
+    ripgrep \
+    fd-find \
+    zoxide \
+    lolcat \
+    wl-clipboard \
+    fzf \
+    # Network / data
+    curl \
+    wget \
+    jq \
+    # Process / port inspection
+    lsof \
+    htop \
+    # Container inner-loop tools
+    podman-remote \
+    skopeo \
+    && dnf clean all
+
+# ── Git config ───────────────────────────────────────────────
+# gpgsign=false by default; host ~/.gnupg is mounted so you can
+# enable it per-repo with: git config --local commit.gpgsign true
+RUN git config --system user.name "Vicente" && \
+    git config --system user.email "33096355+Vicente015@users.noreply.github.com" && \
+    git config --system init.defaultBranch main && \
+    git config --system pull.rebase true && \
+    git config --system core.pager delta && \
+    git config --system delta.syntax-theme OneHalfDark && \
+    git config --system delta.side-by-side true && \
+    git config --system interactive.diffFilter "delta --color-only" && \
+    git config --system merge.conflictstyle diff3 && \
+    git config --system diff.colorMoved zebra && \
+    git config --system commit.gpgsign false
+
+# ── Starship config ──────────────────────────────────────────
+RUN mkdir -p /etc/starship
+COPY --chmod=644 starship.toml /etc/starship/starship.toml
+
+# ── Bash environment — /etc/bashrc.d/dev.sh ─────────────────
+RUN mkdir -p /etc/bashrc.d && cat > /etc/bashrc.d/dev.sh << 'BASHRC'
+# ── Homebrew symlink (runtime, not build-time) ────────────────
+# brew binaries need /home/linuxbrew/.linuxbrew as ELF interpreter path.
+# Run as root at container start — toolbox init-container handles this.
+if [ -d /run/host/home/linuxbrew ] && [ ! -L /home/linuxbrew ]; then
+  rm -rf /home/linuxbrew 2>/dev/null || true
+  ln -sfn /run/host/home/linuxbrew /home/linuxbrew 2>/dev/null || true
+fi
+
+# ── Homebrew (host install, accessible via /run/host) ────────
+# /home/linuxbrew is outside $HOME so toolbox doesn't mount it,
+# but the full host filesystem is at /run/host inside the container.
+HOMEBREW_PREFIX="/run/host/home/linuxbrew/.linuxbrew"
+
+# ── user-level runtimes (auto-available via mounted $HOME) ───
+export VOLTA_HOME="$HOME/.volta"
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export DENO_INSTALL="$HOME/.deno"
+export GOPATH="$HOME/.go"
+export BUN_INSTALL="$HOME/.bun"
+export ANDROID_HOME="$HOME/Android/Sdk"
+
+# ── nb tools ─────────────────────────────────────────────────
+export NB_MARKDOWN_TOOL="glow"
+export NB_DIRECTORY_TOOL="eza"
+export NB_IMAGE_TOOL="catimg"
+
+# ── editor (micro from host brew, fallback to vim) ───────────
+if [ -x "$HOMEBREW_PREFIX/bin/micro" ]; then
+  export EDITOR="$HOMEBREW_PREFIX/bin/micro"
+else
+  export EDITOR="vim"
+fi
+
+# ── PATH ─────────────────────────────────────────────────────
+# Order: volta → pnpm → user bins → host brew → system
+export PATH="\
+$VOLTA_HOME/bin:\
+$PNPM_HOME:\
+$DENO_INSTALL/bin:\
+$GOPATH/bin:\
+$HOME/.cargo/bin:\
+$BUN_INSTALL/bin:\
+$HOME/.local/bin:\
+$ANDROID_HOME/platform-tools:\
+$ANDROID_HOME/emulator:\
+$HOMEBREW_PREFIX/bin:\
+$HOMEBREW_PREFIX/sbin:\
+$HOMEBREW_PREFIX/opt/rustup/bin:\
+$PATH"
+
+# ── RTK (Rust Token Killer) ───────────────────────────────────
+# Installed via host Homebrew at first login — always latest version.
+# brew is available via /run/host PATH after the symlink above.
+# RTK reduces LLM token consumption 60-90% by compressing command
+# output before it reaches the AI agent (opencode, copilot, etc).
+if command -v brew &>/dev/null; then
+  if ! command -v rtk &>/dev/null; then
+    echo "[dev-toolbox] Installing RTK via brew (first login)..."
+    brew install rtk-ai/tap/rtk
+  fi
+  if [ ! -f "$HOME/.config/rtk/.initialized_in_container" ]; then
+    mkdir -p "$HOME/.config/rtk"
+    rtk init --global 2>/dev/null || true
+    rtk init --global --opencode 2>/dev/null || true
+    touch "$HOME/.config/rtk/.initialized_in_container"
+  fi
+  if [ ! -f "$HOME/.config/rtk/config.toml" ]; then
+    cat > "$HOME/.config/rtk/config.toml" << 'RTKCONF'
+[hooks]
+# Commands where raw output matters more than token savings
+exclude_commands = [
+  "git rebase",
+  "git cherry-pick",
+  "git stash",
+]
+
+[output]
+tee = false
+RTKCONF
+  fi
+fi
+
+# ── Kagi token ────────────────────────────────────────────────
+# kagi 0.5.3 looks for .kagi.toml in CWD, not $HOME — export via env instead.
+if [ -z "${KAGI_SESSION_TOKEN:-}" ] && [ -f "$HOME/.kagi.toml" ]; then
+  _kagi_token=$(grep 'session_token' "$HOME/.kagi.toml" | head -1 | sed 's/.*= *"\(.*\)"/\1/')
+  [ -n "$_kagi_token" ] && export KAGI_SESSION_TOKEN="$_kagi_token"
+  unset _kagi_token
+fi
+
+# ── ai / aic — Kagi Assistant (primary web search for agents) ─
+# Standard interactive usage: renders markdown via glow
+ai() {
+  local kagi_json
+  kagi_json=$(kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1")
+  LAST_THREAD_ID=$(echo "$kagi_json" | jq -r '.thread.id')
+  echo "$kagi_json" | jq -r '"Thread: \(.thread.id)\n\n\(.message.markdown)\n\n\(.message.references_markdown)"' | glow
+}
+
+aic() {
+  local kagi_json
+  kagi_json=$(kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d --thread-id "$LAST_THREAD_ID" "$1")
+  LAST_THREAD_ID=$(echo "$kagi_json" | jq -r '.thread.id')
+  echo "$kagi_json" | jq -r '"Thread: \(.thread.id)\n\n\(.message.markdown)\n\n\(.message.references_markdown)"' | glow
+}
+
+# ── ai_raw — Kagi for agents/scripts (plain text, no glow) ───
+# Use this inside scripts or when piping output to other tools.
+# Returns clean markdown text that agents can process directly.
+#   ai_raw "query"                    → plain markdown to stdout
+#   ai_raw "query" | head -20         → first 20 lines
+#   RESULT=$(ai_raw "what is X")      → capture in variable
+ai_raw() {
+  local kagi_json
+  kagi_json=$(kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1")
+  AI_LAST_THREAD_ID=$(echo "$kagi_json" | jq -r '.thread.id')
+  echo "$kagi_json" | jq -r '.message.markdown'
+}
+
+# ── aic_raw — Kagi thread continuation for agents ─────────────
+# Continue a Kagi thread from scripts without rendering.
+#   aic_raw "follow-up question"
+aic_raw() {
+  local kagi_json
+  kagi_json=$(kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d --thread-id "$AI_LAST_THREAD_ID" "$1")
+  AI_LAST_THREAD_ID=$(echo "$kagi_json" | jq -r '.thread.id')
+  echo "$kagi_json" | jq -r '.message.markdown'
+}
+
+# ── ai_json — raw JSON output (full Kagi response) ────────────
+# For agents that need to parse references, thread ID, etc.
+#   ai_json "query" | jq '.message.references'
+ai_json() {
+  kagi assistant --format json --assistant 776a11a1-cb07-4d3e-8b02-b5d1e313235d "$1"
+}
+
+# ── Navigation aliases ────────────────────────────────────────
+alias i='cd $HOME/i'
+alias clones='cd $HOME/i/_clones'
+alias forks='cd $HOME/i/_forks'
+alias issues='cd $HOME/i/_issues'
+alias ii='cd $HOME/ii'
+alias v='cd $HOME/v'
+alias tmp='cd $HOME/tmp'
+alias garden='cd $HOME/v/notes/garden'
+alias h='cd $HOME'
+
+# ── Tool aliases ──────────────────────────────────────────────
+alias open='open-cli'
+alias gc='czg'
+alias music='ncmpc'
+
+# ── ls → eza (from host brew via PATH) ───────────────────────
+if command -v eza &>/dev/null; then
+  alias ls='eza -G --color auto --icons -s type'
+  alias ll='eza -l --color always --icons -a -s type'
+  alias lsd='eza --color always --icons | lolcat'
+fi
+
+# ── rm → trash ───────────────────────────────────────────────
+if command -v trash &>/dev/null; then
+  alias rm='trash'
+fi
+
+# ── cat → smartcat (bat + glow + catimg) ─────────────────────
+smartcat() {
+  for file in "$@"; do
+    case "$file" in
+      *.jpg|*.jpeg|*.png|*.gif)
+        catimg "$file" ;;
+      *.md)
+        glow "$file" ;;
+      *)
+        bat --paging=never -n --theme="OneHalfDark" "$file" ;;
+    esac
+  done
+}
+alias cat='smartcat'
+
+# ── Clipboard (Wayland) ───────────────────────────────────────
+if command -v wl-copy &>/dev/null; then
+  alias cb='wl-copy'
+  alias pb='wl-paste'
+fi
+
+# ── Utility functions ─────────────────────────────────────────
+count_files() { find . -type f | wc -l; }
+findport() { lsof -nP -iTCP -sTCP:LISTEN | grep "$1"; }
+repl() { NODE_PATH=$(pnpm root -g) node; }
+
+trash() {
+  case "$1" in
+    --clear) empty-trash ;;
+    *) command trash "$@" ;;
+  esac
+}
+
+# ── Starship prompt (from host brew via PATH) ─────────────────
+export STARSHIP_CONFIG="/etc/starship/starship.toml"
+if command -v starship &>/dev/null; then
+  eval "$(starship init bash)"
+fi
+
+# ── zoxide (smarter cd, from DNF) ────────────────────────────
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init bash)"
+fi
+
+# ── bash-completion ───────────────────────────────────────────
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+  . /usr/share/bash-completion/bash_completion
+fi
+BASHRC
+
+# ── Ensure /etc/bashrc sources bashrc.d ──────────────────────
+RUN echo '' >> /etc/bashrc && \
+    echo '# Load drop-in configs' >> /etc/bashrc && \
+    echo 'for f in /etc/bashrc.d/*.sh; do [ -r "$f" ] && . "$f"; done' >> /etc/bashrc
